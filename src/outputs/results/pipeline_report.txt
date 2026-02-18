@@ -1,0 +1,26 @@
+Privacy-Preserving Load Forecasting & Energy Optimization
+============================================================
+
+Simulation: 50 homes, 30 days
+Total records: 144,000
+
+VAE:
+  Final train loss: 0.0942
+  Final val loss:   0.0881
+
+Federated GRU:
+  MAE:  1.8726
+  RMSE: 2.5528
+  MAPE: 64.86%
+
+Stackelberg Game:
+  Equilibrium Price: ₹3.00/kWh
+  Total Demand:      8.42 kW
+
+Differential Evolution:
+  Cost Savings:      37.4%
+  Peak Reduction:    4.1%
+  Unoptimized Cost:  ₹1308.00
+  Optimized Cost:    ₹818.35
+
+Total Pipeline Time: 297.3s
