@@ -198,3 +198,117 @@ def run_stackelberg(config: dict, gru_results: dict,
 
     result = find_stackelberg_equilibrium(config, num_homes, avg_loads)
     return result
+
+
+# ---------------------------------------------------------------------------
+# Hourly Stackelberg Game (runs equilibrium per hour)
+# ---------------------------------------------------------------------------
+def run_hourly_stackelberg(
+    tou_prices_hourly: np.ndarray,
+    user_schedule_hourly: np.ndarray,
+    rated_powers: np.ndarray,
+    forecasted_loads_hourly: np.ndarray = None,
+    num_users: int = 50,
+    supply_capacity_kw: float = 15.0,
+    comfort_weight: float = 2.5,
+    price_min: float = None,
+    price_max: float = None,
+    num_iterations: int = 50,
+) -> dict:
+    """
+    Run a Stackelberg equilibrium for each of 24 hours independently.
+
+    Uses the user's current schedule as the demand forecast per hour.
+    The leader (grid operator) sets a price for each hour; followers
+    respond with optimal consumption.
+
+    Args:
+        tou_prices_hourly: TOU prices per hour (24,)
+        user_schedule_hourly: User schedule (num_appliances × 24), binary
+        rated_powers: Rated power per appliance (num_appliances,)
+        forecasted_loads_hourly: Optional GRU forecasted total load (24,).
+            When provided, this demand profile is used instead of deriving
+            demand from the manual schedule.
+        num_users: Number of follower users in the game
+        supply_capacity_kw: Grid capacity per hour (kW)
+        comfort_weight: Follower comfort weight
+        price_min: Min price to search (defaults to min TOU)
+        price_max: Max price to search (defaults to max TOU * 1.5)
+        num_iterations: Iterations for equilibrium search per hour
+
+    Returns:
+        Dictionary with hourly_prices (24,) and per-hour game details
+    """
+    if price_min is None:
+        price_min = max(0.5, float(tou_prices_hourly.min()) * 0.5)
+    if price_max is None:
+        price_max = float(tou_prices_hourly.max()) * 1.5
+
+    # Compute hourly demand profile (kW per hour)
+    if forecasted_loads_hourly is not None:
+        power_per_hour = np.asarray(forecasted_loads_hourly, dtype=float).flatten()
+        if power_per_hour.shape[0] != 24:
+            raise ValueError("forecasted_loads_hourly must have length 24")
+        power_per_hour = np.maximum(power_per_hour, 0.1)
+    else:
+        power_per_hour = (user_schedule_hourly * rated_powers[:, np.newaxis]).sum(axis=0)
+
+    hourly_prices = np.zeros(24)
+    hourly_demands = np.zeros(24)
+    hourly_profits = np.zeros(24)
+
+    np.random.seed(42)
+    comfort_weights = np.full(num_users, comfort_weight) * np.random.uniform(
+        0.8, 1.2, num_users
+    )
+
+    for hour in range(24):
+        # Forecasted load per user at this hour
+        total_demand_kw = power_per_hour[hour]
+        per_user_load = max(total_demand_kw / max(num_users, 1), 0.1)
+        max_consumptions = np.full(num_users, per_user_load) * np.random.uniform(
+            0.7, 1.3, num_users
+        )
+
+        # Grid search for optimal leader price at this hour
+        best_price = price_min
+        best_profit = -np.inf
+
+        for iteration in range(num_iterations):
+            if iteration < num_iterations // 2:
+                prices = np.linspace(price_min, price_max, 30)
+            else:
+                delta = (price_max - price_min) / (iteration + 1)
+                prices = np.linspace(
+                    max(price_min, best_price - delta),
+                    min(price_max, best_price + delta),
+                    30,
+                )
+
+            for p in prices:
+                profit = leader_objective(
+                    p, num_users, comfort_weights,
+                    max_consumptions, supply_capacity_kw
+                )
+                if profit > best_profit:
+                    best_profit = profit
+                    best_price = p
+
+        hourly_prices[hour] = best_price
+        eq_demand, _ = compute_total_demand(
+            best_price, num_users, comfort_weights, max_consumptions
+        )
+        hourly_demands[hour] = eq_demand
+        hourly_profits[hour] = best_profit
+
+    print(f"\nHourly Stackelberg Equilibrium:")
+    print(f"  Price range:  ₹{hourly_prices.min():.2f} – ₹{hourly_prices.max():.2f}/kWh")
+    print(f"  Avg price:    ₹{hourly_prices.mean():.2f}/kWh")
+    print(f"  Grid capacity: {supply_capacity_kw:.1f} kW")
+
+    return {
+        "hourly_prices": hourly_prices,
+        "hourly_demands": hourly_demands,
+        "hourly_profits": hourly_profits,
+        "supply_capacity_kw": supply_capacity_kw,
+    }

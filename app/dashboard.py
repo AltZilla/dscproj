@@ -14,8 +14,15 @@ from dash import dcc, html, Input, Output, State, ctx, ALL, no_update
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import numpy as np
+import pandas as pd
+import torch
 from pathlib import Path
 import json
+
+from src.digital_twin import load_config
+from src.preprocessing import load_raw_data, add_features, get_feature_columns
+from src.vae import VAE
+from src.federated_gru import GRUForecaster, predict as gru_predict
 
 
 # ---------------------------------------------------------------------------
@@ -56,18 +63,20 @@ APPLIANCE_LOCATIONS = {
 HOUR_LABELS = [f"{h%12 or 12}{'A' if h<12 else 'P'}" for h in range(24)]
 
 # Default schedule: peak-heavy
+# Realistic default schedule for a typical household
+#                    12A 1A 2A 3A 4A 5A 6A 7A 8A 9A 10 11 12P 1P 2P 3P 4P 5P 6P 7P 8P 9P 10 11
 DEFAULT_SCHEDULE = {
-    "hvac":         [0]*6 + [0]*4 + [0]*4 + [0]*4 + [1]*4 + [1]*2,
-    "washer":       [0]*6 + [0]*4 + [0]*4 + [0]*4 + [1]*4 + [0]*2,
-    "dryer":        [0]*6 + [0]*4 + [0]*4 + [0]*4 + [1]*4 + [0]*2,
-    "dishwasher":   [0]*6 + [0]*4 + [0]*4 + [0]*4 + [1]*4 + [0]*2,
-    "ev_charger":   [0]*6 + [0]*4 + [0]*4 + [0]*4 + [1]*4 + [1]*2,
-    "lighting":     [0]*6 + [0]*4 + [0]*4 + [0]*4 + [1]*4 + [1]*2,
-    "water_heater": [0]*6 + [1]*2 + [0]*6 + [0]*4 + [1]*4 + [1]*2,
+    "hvac":         [0,  0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0,  0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0],
+    "washer":       [0,  0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "dryer":        [0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "dishwasher":   [0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+    "ev_charger":   [0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0],
+    "lighting":     [0,  0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,  0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0],
+    "water_heater": [0,  0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
 }
 
-# Default occupancy
-DEFAULT_OCCUPANCY = [0]*6 + [2]*2 + [0]*4 + [0]*4 + [1]*2 + [3]*4 + [2]*2
+# Typical occupancy: sleep 12A-5A, morning 6A-8A, out 9A-4P, home 5P-11P
+DEFAULT_OCCUPANCY = [1, 1, 1, 1, 1, 1, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 3, 3, 2, 2, 1]
 
 # Default rates
 DEFAULT_RATES = {"off_peak": 2.0, "shoulder": 5.0, "peak": 12.0}
@@ -85,6 +94,215 @@ def hour_to_price(rates, periods):
         for h in hours:
             prices[h] = rates[period_name]
     return prices
+
+
+# ---------------------------------------------------------------------------
+# Cached ML Context (VAE + GRU)
+# ---------------------------------------------------------------------------
+_ML_CONTEXT = None
+
+
+def _get_ml_context():
+    """Load/caches config, scaling stats, and trained VAE/GRU models."""
+    global _ML_CONTEXT
+    if _ML_CONTEXT is not None:
+        return _ML_CONTEXT
+
+    config = load_config()
+    pre_cfg = config["preprocessing"]
+    norm_method = pre_cfg.get("normalization", "minmax").lower()
+
+    raw_df = load_raw_data()
+    engineered = add_features(raw_df.copy(), pre_cfg["rolling_window_slots"])
+    feature_cols = [c for c in get_feature_columns() if c in engineered.columns]
+    feat_df = engineered[feature_cols].astype(float)
+
+    if norm_method == "zscore":
+        feature_mean = feat_df.mean()
+        feature_std = feat_df.std().replace(0, 1.0)
+        norm_stats = {"mean": feature_mean, "std": feature_std}
+    else:
+        feature_min = feat_df.min()
+        feature_max = feat_df.max()
+        norm_stats = {"min": feature_min, "max": feature_max}
+
+    models_dir = Path(__file__).resolve().parent.parent / "outputs" / "models"
+    vae_path = models_dir / "vae.pt"
+    gru_path = models_dir / "federated_gru.pt"
+    if not vae_path.exists():
+        raise FileNotFoundError(f"Missing trained model: {vae_path}")
+    if not gru_path.exists():
+        raise FileNotFoundError(f"Missing trained model: {gru_path}")
+
+    device = "cpu"
+
+    vae_state = torch.load(vae_path, map_location=device)
+    vae_input_dim = int(vae_state["encoder.0.weight"].shape[1])
+    vae_hidden_dim = int(vae_state["encoder.0.weight"].shape[0])
+    vae_latent_dim = int(vae_state["fc_mu.weight"].shape[0])
+    if len(feature_cols) != vae_input_dim:
+        raise ValueError(
+            f"Feature count mismatch: expected {vae_input_dim}, got {len(feature_cols)}"
+        )
+    vae_model = VAE(
+        input_dim=vae_input_dim,
+        hidden_dim=vae_hidden_dim,
+        latent_dim=vae_latent_dim,
+    ).to(device)
+    vae_model.load_state_dict(vae_state)
+    vae_model.eval()
+
+    gru_state = torch.load(gru_path, map_location=device)
+    gru_input_dim = int(gru_state["gru.weight_ih_l0"].shape[1])
+    gru_hidden_dim = int(gru_state["gru.weight_ih_l0"].shape[0] // 3)
+    gru_output_dim = int(gru_state["fc.2.weight"].shape[0])
+    gru_num_layers = len([k for k in gru_state if k.startswith("gru.weight_ih_l")])
+    gru_model = GRUForecaster(
+        input_dim=gru_input_dim,
+        hidden_dim=gru_hidden_dim,
+        num_layers=gru_num_layers,
+        output_dim=gru_output_dim,
+    ).to(device)
+    gru_model.load_state_dict(gru_state)
+    gru_model.eval()
+
+    _ML_CONTEXT = {
+        "config": config,
+        "norm_method": norm_method,
+        "norm_stats": norm_stats,
+        "feature_columns": feature_cols,
+        "vae_model": vae_model,
+        "gru_model": gru_model,
+        "sequence_length": int(config["federated_gru"]["sequence_length"]),
+        "rated_powers": np.array([RATED_POWERS[a] for a in APPLIANCE_NAMES], dtype=float),
+    }
+    return _ML_CONTEXT
+
+
+def _normalize_feature_frame(df: pd.DataFrame, ml_ctx: dict) -> pd.DataFrame:
+    """Normalize feature frame using the same strategy as preprocessing."""
+    cols = ml_ctx["feature_columns"]
+    norm_method = ml_ctx["norm_method"]
+    stats = ml_ctx["norm_stats"]
+    out = df.copy()
+
+    if norm_method == "zscore":
+        mean = stats["mean"]
+        std = stats["std"].replace(0, 1.0)
+        out[cols] = (out[cols] - mean) / std
+    else:
+        min_v = stats["min"]
+        max_v = stats["max"]
+        denom = (max_v - min_v).replace(0, 1.0)
+        out[cols] = ((out[cols] - min_v) / denom).clip(0.0, 1.0)
+
+    return out
+
+
+def _occupancy_to_state(occupancy_hourly: np.ndarray) -> np.ndarray:
+    """Map dashboard occupancy counts to digital-twin occupancy states."""
+    states = np.zeros(24, dtype=float)
+    for h, occ in enumerate(occupancy_hourly):
+        if occ <= 0:
+            states[h] = 1.0  # Away
+        elif h < 6:
+            states[h] = 2.0  # Sleeping
+        else:
+            states[h] = 0.0  # Home
+    return states
+
+
+def _build_hourly_feature_frame(user_schedule_hourly: np.ndarray,
+                                prices_hourly: np.ndarray,
+                                occupancy_hourly: np.ndarray,
+                                ml_ctx: dict) -> pd.DataFrame:
+    """Create a 24-row feature frame that matches model training features."""
+    config = ml_ctx["config"]
+    env_cfg = config["digital_twin"]["environment"]
+    roll_window = max(1, int(config["preprocessing"].get("rolling_window_slots", 4)))
+
+    hours = np.arange(24, dtype=float)
+    feature_df = pd.DataFrame(index=np.arange(24))
+
+    for i, app in enumerate(APPLIANCE_NAMES):
+        feature_df[f"power_{app}_kw"] = user_schedule_hourly[i] * RATED_POWERS[app]
+
+    total_power = np.sum(user_schedule_hourly * ml_ctx["rated_powers"][:, np.newaxis], axis=0)
+    series = pd.Series(total_power)
+
+    base_temp = float(env_cfg["base_outdoor_temp_c"])
+    amp_temp = float(env_cfg["temp_amplitude_c"])
+    outdoor = base_temp + amp_temp * np.cos(2 * np.pi * (hours - 14.0) / 24.0)
+
+    comfort_min = float(env_cfg["comfort_temp_min_c"])
+    comfort_max = float(env_cfg["comfort_temp_max_c"])
+    indoor = np.full(24, (comfort_min + comfort_max) / 2.0, dtype=float)
+    hvac_on = user_schedule_hourly[APPLIANCE_NAMES.index("hvac")] > 0.5
+    for h in range(1, 24):
+        # Hour-level approximation of thermal drift/cooling dynamics.
+        drift = 0.2 * (outdoor[h - 1] - indoor[h - 1])
+        indoor[h] = indoor[h - 1] + drift
+        if hvac_on[h]:
+            indoor[h] -= 0.6
+
+    humidity = env_cfg["humidity_base_pct"] - 0.5 * (outdoor - base_temp)
+
+    feature_df["outdoor_temp_c"] = outdoor
+    feature_df["indoor_temp_c"] = indoor
+    feature_df["humidity_pct"] = humidity
+    feature_df["hour_sin"] = np.sin(2 * np.pi * hours / 24.0)
+    feature_df["hour_cos"] = np.cos(2 * np.pi * hours / 24.0)
+    feature_df["price_inr_kwh"] = prices_hourly
+    feature_df["occupancy"] = _occupancy_to_state(occupancy_hourly)
+    feature_df["is_weekend"] = 0.0
+    feature_df["rolling_avg_power"] = series.rolling(roll_window, min_periods=1).mean().to_numpy()
+    feature_df["rolling_std_power"] = series.rolling(roll_window, min_periods=1).std().fillna(0).to_numpy()
+    feature_df["power_lag_1"] = series.shift(1).fillna(series.iloc[0]).to_numpy()
+    feature_df["power_lag_4"] = series.shift(4).fillna(series.iloc[0]).to_numpy()
+
+    missing = [c for c in ml_ctx["feature_columns"] if c not in feature_df.columns]
+    if missing:
+        raise ValueError(f"Missing expected features for inference: {missing}")
+    return feature_df[ml_ctx["feature_columns"]]
+
+
+def _forecast_hourly_load(user_schedule_hourly: np.ndarray,
+                          prices_hourly: np.ndarray,
+                          occupancy_hourly: np.ndarray,
+                          ml_ctx: dict) -> np.ndarray:
+    """Run 24h demand inference through VAE -> GRU using cached trained models."""
+    feature_df = _build_hourly_feature_frame(
+        user_schedule_hourly, prices_hourly, occupancy_hourly, ml_ctx
+    )
+    feature_df = _normalize_feature_frame(feature_df, ml_ctx)
+
+    x = torch.from_numpy(feature_df.values.astype(np.float32))
+    with torch.no_grad():
+        mu, _ = ml_ctx["vae_model"].encode(x)
+    latent = mu.cpu().numpy()
+    gru_input_dim = ml_ctx["gru_model"].gru.input_size
+    if latent.shape[1] != gru_input_dim:
+        raise ValueError(
+            f"Latent dim mismatch: VAE produced {latent.shape[1]}, GRU expects {gru_input_dim}"
+        )
+
+    baseline = np.sum(
+        user_schedule_hourly * ml_ctx["rated_powers"][:, np.newaxis], axis=0
+    ).astype(float)
+
+    seq_len = ml_ctx["sequence_length"]
+    if latent.shape[0] <= seq_len:
+        return np.maximum(baseline, 0.1)
+
+    preds = gru_predict(ml_ctx["gru_model"], latent, seq_len, device="cpu")
+    forecast = baseline.copy()
+    n = min(len(preds), max(0, 24 - seq_len))
+    if n > 0:
+        forecast[seq_len:seq_len + n] = preds[:n]
+        warm = float(np.mean(preds[:min(3, n)]))
+        forecast[:seq_len] = 0.5 * forecast[:seq_len] + 0.5 * warm
+
+    return np.maximum(forecast, 0.1)
 
 
 # ---------------------------------------------------------------------------
@@ -278,6 +496,25 @@ def create_app():
                              style={"fontSize": "9px", "color": "#666"})], className="mt-1"),
                 ]),
 
+                # Grid capacity
+                _card([
+                    _section_title("🔋 Grid Capacity"),
+                    dbc.Row([
+                        dbc.Col([
+                            html.Label("Max kW per hour", style={"fontSize": "10px", "color": "#ffc107"}),
+                            dcc.Input(id="grid-capacity", type="number", value=15.0,
+                                      min=1, max=100, step=0.5,
+                                      style=_input_style("#ffc107")),
+                        ], width=6),
+                        dbc.Col([
+                            html.Div("Exceeding this limit incurs steep penalties "
+                                     "during optimization.",
+                                     style={"fontSize": "9px", "color": "#666",
+                                            "marginTop": "18px"}),
+                        ], width=6),
+                    ]),
+                ]),
+
                 # Occupancy
                 _card([
                     _section_title("👤 Occupancy (people per hour)"),
@@ -427,38 +664,76 @@ def create_app():
         [State("schedule-store", "data"),
          State("rate-offpeak", "value"),
          State("rate-shoulder", "value"),
-         State("rate-peak", "value")]
+         State("rate-peak", "value"),
+         State("grid-capacity", "value")]
         + [State({"type": "occ", "hour": h}, "value") for h in range(24)],
         prevent_initial_call=True,
     )
-    def run_optimize(n_clicks, schedule_store, rate_off, rate_sh, rate_pk, *occ_values):
+    def run_optimize(n_clicks, schedule_store, rate_off, rate_sh, rate_pk, grid_cap, *occ_values):
         from src.differential_evolution import quick_optimize
+        from src.stackelberg_game import run_hourly_stackelberg
 
         # Build inputs
         user_schedule = np.array([schedule_store[app] for app in APPLIANCE_NAMES], dtype=float)
+        rated_powers = np.array([RATED_POWERS[app] for app in APPLIANCE_NAMES])
 
         rates = {"off_peak": rate_off or 2.0, "shoulder": rate_sh or 5.0, "peak": rate_pk or 12.0}
         prices = hour_to_price(rates, DEFAULT_PERIODS)
 
         occupancy = np.array([v or 0 for v in occ_values], dtype=float)
+        capacity = float(grid_cap or 15.0)
 
-        # Run optimization
-        results = quick_optimize(user_schedule, prices, occupancy)
+        # Try to infer demand with cached VAE+GRU models.
+        forecast_loads = None
+        ml_signal = "rules-only"
+        try:
+            ml_ctx = _get_ml_context()
+            forecast_loads = _forecast_hourly_load(user_schedule, prices, occupancy, ml_ctx)
+            ml_signal = "VAE+GRU"
+        except Exception:
+            # Preserve current interactive behavior if ML assets are unavailable.
+            forecast_loads = None
+
+        # Run hourly Stackelberg game to get dynamic equilibrium prices
+        sg_results = run_hourly_stackelberg(
+            tou_prices_hourly=prices,
+            user_schedule_hourly=user_schedule,
+            rated_powers=rated_powers,
+            forecasted_loads_hourly=forecast_loads,
+            supply_capacity_kw=capacity,
+        )
+        stackelberg_prices = sg_results["hourly_prices"]
+
+        # Run optimization with Stackelberg prices + grid capacity (+ forecast guidance)
+        results = quick_optimize(
+            user_schedule, prices, occupancy,
+            grid_capacity_kw=capacity,
+            stackelberg_prices=stackelberg_prices,
+            forecast_loads_hourly=forecast_loads,
+        )
 
         # Serialize for store
         store_data = {
             "optimized_hourly": results["optimized_hourly"].tolist(),
             "user_hourly": user_schedule.tolist(),
             "prices_hourly": prices.tolist(),
+            "stackelberg_prices": stackelberg_prices.tolist(),
+            "grid_capacity_kw": capacity,
             "unoptimized_cost": results["unoptimized_cost"],
             "optimized_cost": results["optimized_cost"],
             "savings_pct": results["savings_pct"],
             "peak_reduction_pct": results["peak_reduction_pct"],
             "unopt_peak": results["unopt_peak"],
             "opt_peak": results["opt_peak"],
+            "ml_signal": ml_signal,
         }
+        if forecast_loads is not None:
+            store_data["gru_forecast_hourly"] = forecast_loads.tolist()
 
-        status = f"✅ Optimized in {len(results['history']['best_fitness'])} generations"
+        status = (
+            f"✅ Optimized in {len(results['history']['best_fitness'])} gens | "
+            f"Grid: {capacity:.0f}kW | Signal: {ml_signal}"
+        )
 
         return (
             store_data, status,
@@ -502,9 +777,21 @@ def create_app():
         else:
             period, pcol = "Peak", "#f44336"
 
+        # Show Stackelberg equilibrium price if available
+        sg_price_text = ""
+        if results_data and isinstance(results_data, dict) and "stackelberg_prices" in results_data:
+            sg_price = results_data["stackelberg_prices"][hour]
+            sg_price_text = f"  |  SG: ₹{sg_price:.1f}"
+        gru_load_text = ""
+        if results_data and isinstance(results_data, dict) and "gru_forecast_hourly" in results_data:
+            gru_load = results_data["gru_forecast_hourly"][hour]
+            gru_load_text = f"  |  GRU: {gru_load:.1f}kW"
+
         label = html.Span([
             f"🕐 {HOUR_LABELS[hour]} ({hour}:00)  |  ",
             html.Span(f"₹{price:.0f}/kWh ({period})", style={"color": pcol}),
+            html.Span(sg_price_text, style={"color": "#ab47bc"}) if sg_price_text else "",
+            html.Span(gru_load_text, style={"color": "#00bcd4"}) if gru_load_text else "",
         ])
 
         # User house
