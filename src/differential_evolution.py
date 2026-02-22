@@ -447,7 +447,8 @@ def quick_optimize(user_schedule_hourly: np.ndarray,
                 # Minimum distance to any of user's original ON-hours
                 min_dist = min(abs(h - uh) for uh in user_on_hours[i])
                 # Quadratic penalty: distance 1 = 1, distance 3 = 9, distance 6 = 36
-                shift_penalty += (min_dist ** 2) * rated_powers[i] * 0.3
+                # Increased multiplier so it stays closer to the user's intended block
+                shift_penalty += (min_dist ** 2) * rated_powers[i] * 1.0
 
         # === 4. Consecutiveness reward (negative penalty) for sequential appliances ===
         consec_penalty = 0.0
@@ -462,6 +463,28 @@ def quick_optimize(user_schedule_hourly: np.ndarray,
                 gap = on_hours[k] - on_hours[k-1]
                 if gap > 1:
                     consec_penalty += gap * rated_powers[i] * 2
+
+        # === 4b. Thermostat pulsing penalty ===
+        # Penalize being continuously ON for multiple hours, since thermostatically 
+        # controlled loads naturally pulse (duty cycle) to maintain temperature setting.
+        thermostat_penalty = 0.0
+        THERMOSTAT_APPS = {"hvac", "water_heater"}
+        for i, app in enumerate(APPLIANCE_NAMES):
+            if app not in THERMOSTAT_APPS:
+                continue
+            on_hours = sorted(np.where(sched[i] > 0.5)[0])
+            if len(on_hours) <= 1:
+                continue
+            
+            consecutive_count = 1
+            for k in range(1, len(on_hours)):
+                if on_hours[k] - on_hours[k-1] == 1:
+                    consecutive_count += 1
+                    # Only penalize if more than 2 consecutive hours, so it groups into blocks of 2
+                    if consecutive_count > 2:
+                        thermostat_penalty += ((consecutive_count - 2) ** 2) * rated_powers[i] * 5.0
+                else:
+                    consecutive_count = 1
 
         # === 5. Peak load penalty ===
         peak_load = np.max(total_per_slot)
@@ -490,6 +513,7 @@ def quick_optimize(user_schedule_hourly: np.ndarray,
                 + comfort_penalty
                 + shift_penalty
                 + consec_penalty
+                + thermostat_penalty
                 + peak_penalty
                 + capacity_penalty
                 + 5 * constraint_penalty

@@ -71,12 +71,16 @@ Once the grid broadcasts the real-time game-theoretic SG blended prices, individ
 *   **Hard Constraints:** 
     *   *Sequential:* The Dryer must exclusively run *after* the Washer. 
     *   *Minimum Run Duration:* Washers must execute uninterrupted for at least 45 minutes once engaged.
-*   **The Model-Driven Fitness Logic:**
-    The DE does not use hardcoded slot replacements. It uses domain-knowledge penalty modeling.
-    1.  **Energy Cost Objective:** Minimizes $\sum (\text{Power} \cdot \text{SG\_Price})$.
-    2.  **Occupancy Comfort Penalty:** Severely punishes turning HVAC or Lighting off while people are actively home, or turning them on when the house is empty.
-    3.  **Temporal Proximity Penalty:** Quadratic punishment designed to prevent the algorithm from moving an appliance unreasonably far from the consumer's originally requested time ($Penalty = (Distance\_in\_Hours)^2 \cdot \text{Power} \cdot 0.3$). This ensures 7kW EV chargers shift slightly to shoulder periods rather than moving 14 hours away.
-    4.  **Peak Capacity Dispersal:** Exponentially punishes schedules that attempt to stack multiple heavy appliances in the very same hour.
+*   **The Model-Driven Fitness Logic (Soft Constraints):**
+    The DE does not use hardcoded slot replacements. Instead, it utilizes domain-knowledge penalty modeling. The fitness function actively guides the DE by summing the following real-world operational costs and comfort penalties:
+    1.  **Energy Cost Objective (Primary):** Minimizes the raw monetary electricity cost $\sum (\text{Power} \cdot \text{SG\_Price})$.
+    2.  **Occupancy-Comfort Penalty:** Punishes turning comfort appliances (HVAC, Lighting, Water Heater) OFF while people are actively home ($Occupied > 0$), or wasting electricity by turning them ON when the house is empty.
+    3.  **Temporal Proximity Penalty (The "Rubber Band"):** A steep quadratic punishment designed to prevent the algorithm from moving an appliance unreasonably far from the consumer's originally requested schedule. ($Penalty = (Min\_Distance)^2 \cdot \text{Power} \cdot 1.0$). This allows shifting to cheap adjacent shoulder periods but prevents moving a 7:00 PM evening load to 3:00 AM.
+    4.  **Consecutiveness Reward:** Sequential appliances like washers and dryers are algorithmically rewarded for maintaining adjacent, gapless ON-hours.
+    5.  **Thermostat Duty Cycle Penalty:** Explicitly simulates thermostatic control logic. Thermostatically Controlled Loads (TCLs) such as the **HVAC** and **Water Heater** operate by naturally pulsing ON and OFF to maintain temperature. The optimizer is severely penalized via a quadratic function if it forcefully runs a TCL for strictly longer than 2 uninterrupted consecutive hours, naturally creating realistic duty-cycle bursts!
+    6.  **Peak Load Dispersal:** Exponentially punishes erratic schedules that create massive localized spikes. (e.g. running 4 heavy appliances simultaneously).
+    7.  **Grid Capacity Threshold:** Enforces a rigid physical limit. Any hour where the total household power draw exceeds the grid's maximum supplied capacity (e.g. 15.0 kW) incurs a catastrophic squared penalty.
+    8.  **Forecast Alignment:** Softly nudges the final household schedule to follow the macroscopic shape of the global GRU predicted demand, ensuring the decentralized homes act cooperatively with the utility's expectations!
 
 ---
 
