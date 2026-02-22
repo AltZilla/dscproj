@@ -95,6 +95,33 @@ def run_pipeline(config_path: Optional[str] = None,
     stackelberg_results = run_stackelberg(config, gru_results, num_homes)
     results["stackelberg"] = stackelberg_results
 
+    # Also run hourly Stackelberg for dynamic pricing insight
+    from src.stackelberg_game import run_hourly_stackelberg
+    twin_cfg = config["digital_twin"]
+    pricing_cfg = twin_cfg["pricing"]
+    # Build hourly TOU prices
+    tou_hourly = np.zeros(24)
+    for period_name in ("off_peak", "shoulder", "peak"):
+        period = pricing_cfg[period_name]
+        for h in period["hours"]:
+            tou_hourly[h] = period["rate"]
+
+    # Build representative schedule from GRU predictions
+    appliance_names = list(twin_cfg["appliances"].keys())
+    rated_powers = np.array([twin_cfg["appliances"][n]["rated_power_kw"] for n in appliance_names])
+    # Simple representative schedule (uniform 24h)
+    representative_schedule = np.ones((len(appliance_names), 24)) * 0.3
+
+    supply_cap = config["stackelberg"]["supply_capacity_kw"]
+    hourly_sg = run_hourly_stackelberg(
+        tou_prices_hourly=tou_hourly,
+        user_schedule_hourly=representative_schedule,
+        rated_powers=rated_powers,
+        num_users=num_homes,
+        supply_capacity_kw=supply_cap,
+    )
+    results["hourly_stackelberg"] = hourly_sg
+
     # ---------------------------------------------------------------
     # Stage 6: Differential Evolution (Optimization)
     # ---------------------------------------------------------------
@@ -120,6 +147,7 @@ def run_pipeline(config_path: Optional[str] = None,
         peak_reduction_pct=de_results["peak_reduction_pct"],
         unoptimized_cost=de_results["unoptimized_cost"],
         optimized_cost=de_results["optimized_cost"],
+        hourly_stackelberg_prices=hourly_sg["hourly_prices"],
     )
     print(f"Schedules saved to {schedule_dir / 'de_schedules.npz'}")
 
@@ -135,6 +163,7 @@ def run_pipeline(config_path: Optional[str] = None,
     print(f"GRU MAE:        {gru_results['metrics']['mae']:.4f}")
     print(f"GRU RMSE:       {gru_results['metrics']['rmse']:.4f}")
     print(f"Game Eq Price:  ₹{stackelberg_results['equilibrium_price']:.2f}/kWh")
+    print(f"Hourly SG:      ₹{hourly_sg['hourly_prices'].min():.2f} – ₹{hourly_sg['hourly_prices'].max():.2f}/kWh")
     print(f"Cost Savings:   {de_results['savings_pct']:.1f}%")
     print(f"Peak Reduction: {de_results['peak_reduction_pct']:.1f}%")
 

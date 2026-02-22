@@ -315,71 +315,211 @@ def quick_optimize(user_schedule_hourly: np.ndarray,
                    prices_hourly: np.ndarray,
                    occupancy_hourly: np.ndarray,
                    generations: int = 200,
-                   population: int = 80) -> dict:
+                   population: int = 80,
+                   grid_capacity_kw: float = 15.0,
+                   stackelberg_prices: np.ndarray = None,
+                   forecast_loads_hourly: np.ndarray = None) -> dict:
     """
-    Fast DE optimization for dashboard interactive use.
+    Model-driven optimizer — DE explores the space, fitness function guides decisions.
 
-    Uses an aggressive cost-focused fitness that freely shifts
-    flexible appliances to cheap hours while respecting occupancy
-    and constraint requirements.
+    No hardcoded slot placement. The only hard constraint is ON-count conservation
+    (total hours per appliance match user input). All domain knowledge is encoded
+    as fitness penalties that the DE learns to minimize:
+      - Energy cost (primary objective)
+      - Occupancy-comfort: comfort appliances penalized when OFF during occupied hours
+      - Temporal proximity: penalize shifting ON-hours far from user's original schedule
+      - Consecutiveness: washer/dryer benefit from adjacent ON-hours
+      - Peak load: penalize concentration of load
+      - Grid capacity: penalize exceeding grid_capacity_kw at any hour
+
+    Args:
+        grid_capacity_kw: Maximum grid capacity per hour (kW). Exceeding this
+            incurs a steep penalty.
+        stackelberg_prices: Optional (24,) array of Stackelberg equilibrium
+            prices. When provided, blended with TOU prices so game-theoretic
+            signals influence scheduling.
+        forecast_loads_hourly: Optional (24,) GRU-forecasted total load profile.
+            When provided, optimization is softly guided toward this profile.
     """
     from src.constraints import get_constraint_function
 
     num_appliances = len(APPLIANCE_NAMES)
+    num_slots = 24
     rated_powers = np.array([RATED_POWERS[n] for n in APPLIANCE_NAMES])
 
-    # Expand hourly → 15-min slots (repeat each hour 4×)
-    user_schedule = np.repeat(user_schedule_hourly, 4, axis=1)  # (7, 96)
-    prices = np.repeat(prices_hourly, 4)  # (96,)
-    occupancy = np.repeat(occupancy_hourly, 4)  # (96,)
+    # Blend TOU prices with Stackelberg equilibrium prices when available
+    if stackelberg_prices is not None:
+        # 50/50 blend: keeps TOU structure but shifts costs via game theory
+        prices = 0.5 * prices_hourly + 0.5 * stackelberg_prices
+    else:
+        prices = prices_hourly.copy()
 
-    num_slots = 96
+    occupancy = occupancy_hourly.copy()
+    forecast_loads = None
+    if forecast_loads_hourly is not None:
+        forecast_loads = np.asarray(forecast_loads_hourly, dtype=float).flatten()
+        if forecast_loads.shape[0] != num_slots:
+            raise ValueError("forecast_loads_hourly must have length 24")
+        forecast_loads = np.maximum(forecast_loads, 0.0)
 
-    # Build constraint function with occupancy
-    config = {
-        "constraints": {
-            "max_daily_energy_kwh": 120.0,
-            "max_hourly_power_kw": 20.0,
-        }
-    }
-    constraints_fn = get_constraint_function(config, occupancy)
+    # Target ON-hours per appliance (hard constraint — always conserved)
+    target_on = np.array([int(user_schedule_hourly[i].sum()) for i in range(num_appliances)])
 
-    # Normalize price range for fitness scaling
-    price_range = float(prices.max() - prices.min()) + 1e-8
+    # Pre-compute: which hours each appliance was originally ON
+    user_on_hours = []
+    for i in range(num_appliances):
+        user_on_hours.append(set(np.where(user_schedule_hourly[i] > 0.5)[0]))
 
-    # Custom fitness — cost-focused with strict usage conservation
+    # Pre-compute: occupancy-derived data
+    occupied = (occupancy > 0).astype(float)
+    max_occ = max(occupancy.max(), 1)
+
+    # Appliance categories (derived from appliance properties, not hardcoded slots)
+    # Comfort appliances: high-power, occupancy-dependent usage
+    COMFORT_APPS = {"hvac", "lighting", "water_heater"}
+    # Sequential appliances: benefit from consecutive ON-hours
+    SEQUENTIAL_APPS = {"washer", "dryer"}
+
+    # Build constraint function (use grid capacity for max_hourly_power_kw)
+    occupancy_96 = np.repeat(occupancy_hourly, 4)
+    config = {"constraints": {"max_daily_energy_kwh": 120.0, "max_hourly_power_kw": grid_capacity_kw}}
+    constraints_fn = get_constraint_function(config, occupancy_96)
+
+    def _enforce_on_count(schedule):
+        """Only hard constraint: preserve exact ON-hours per appliance.
+        If over → turn off most expensive. If under → turn on cheapest."""
+        fixed = schedule.copy()
+        for i in range(num_appliances):
+            target = target_on[i]
+            row = fixed[i]
+            on_idx = np.where(row > 0.5)[0]
+            off_idx = np.where(row <= 0.5)[0]
+            current = len(on_idx)
+
+            if current > target and len(on_idx) > 0:
+                costs = prices[on_idx]
+                turn_off = on_idx[np.argsort(-costs)][:current - target]
+                fixed[i, turn_off] = 0.0
+            elif current < target and len(off_idx) > 0:
+                costs = prices[off_idx]
+                turn_on = off_idx[np.argsort(costs)][:target - current]
+                fixed[i, turn_on] = 1.0
+        return fixed
+
     def fitness_fn(schedule):
-        num_app, num_sl = schedule.shape
+        sched = _enforce_on_count(schedule)
 
-        # 1) Energy cost (PRIMARY)
-        power_per_slot = schedule * rated_powers[:, np.newaxis]
+        power_per_slot = sched * rated_powers[:, np.newaxis]
         total_per_slot = power_per_slot.sum(axis=0)
-        energy_cost = np.sum(total_per_slot * prices * (15 / 60))
 
-        # 2) Usage conservation — HARD: each appliance must keep same or less ON-time
-        #    Heavy penalty for adding slots, light penalty for reducing
-        usage_penalty = 0.0
-        for i in range(num_app):
-            orig_on = user_schedule[i].sum()
-            new_on = schedule[i].sum()
-            excess = new_on - orig_on
-            if excess > 0:
-                usage_penalty += excess * 50  # Heavily penalize extra on-time
-            else:
-                usage_penalty += abs(excess) * 0.5  # Lightly penalize reduction
+        # === 1. Energy cost (primary) ===
+        energy_cost = float(np.sum(total_per_slot * prices))
 
-        # 3) Peak load penalty
+        # === 2. Occupancy-comfort penalty ===
+        # Comfort appliances should be ON when people are home
+        # Weighted by occupancy count (3 people home = stronger signal)
+        comfort_penalty = 0.0
+        for i, app in enumerate(APPLIANCE_NAMES):
+            if app not in COMFORT_APPS:
+                continue
+            power = rated_powers[i]
+            for h in range(24):
+                occ = occupancy[h]
+                if occ > 0 and sched[i, h] < 0.5:
+                    # Comfort appliance OFF when people home — bad
+                    comfort_penalty += power * (occ / max_occ) * 3
+                elif occ == 0 and sched[i, h] > 0.5:
+                    # ON when nobody home — wasteful (especially lighting)
+                    if app == "lighting":
+                        comfort_penalty += power * 8  # lights in empty house is pointless
+                    else:
+                        comfort_penalty += power * 0.5  # minor waste for HVAC/WH
+
+        # === 3. Temporal proximity penalty ===
+        # Penalize moving ON-hours far from user's original schedule
+        # This keeps water heater near morning/evening blocks, etc.
+        shift_penalty = 0.0
+        for i in range(num_appliances):
+            if not user_on_hours[i]:
+                continue
+            new_on = np.where(sched[i] > 0.5)[0]
+            for h in new_on:
+                # Minimum distance to any of user's original ON-hours
+                min_dist = min(abs(h - uh) for uh in user_on_hours[i])
+                # Quadratic penalty: distance 1 = 1, distance 3 = 9, distance 6 = 36
+                # Increased multiplier so it stays closer to the user's intended block
+                shift_penalty += (min_dist ** 2) * rated_powers[i] * 1.0
+
+        # === 4. Consecutiveness reward (negative penalty) for sequential appliances ===
+        consec_penalty = 0.0
+        for i, app in enumerate(APPLIANCE_NAMES):
+            if app not in SEQUENTIAL_APPS:
+                continue
+            on_hours = sorted(np.where(sched[i] > 0.5)[0])
+            if len(on_hours) <= 1:
+                continue
+            # Count gaps between ON-hours
+            for k in range(1, len(on_hours)):
+                gap = on_hours[k] - on_hours[k-1]
+                if gap > 1:
+                    consec_penalty += gap * rated_powers[i] * 2
+
+        # === 4b. Thermostat pulsing penalty ===
+        # Penalize being continuously ON for multiple hours, since thermostatically 
+        # controlled loads naturally pulse (duty cycle) to maintain temperature setting.
+        thermostat_penalty = 0.0
+        THERMOSTAT_APPS = {"hvac", "water_heater"}
+        for i, app in enumerate(APPLIANCE_NAMES):
+            if app not in THERMOSTAT_APPS:
+                continue
+            on_hours = sorted(np.where(sched[i] > 0.5)[0])
+            if len(on_hours) <= 1:
+                continue
+            
+            consecutive_count = 1
+            for k in range(1, len(on_hours)):
+                if on_hours[k] - on_hours[k-1] == 1:
+                    consecutive_count += 1
+                    # Only penalize if more than 2 consecutive hours, so it groups into blocks of 2
+                    if consecutive_count > 2:
+                        thermostat_penalty += ((consecutive_count - 2) ** 2) * rated_powers[i] * 5.0
+                else:
+                    consecutive_count = 1
+
+        # === 5. Peak load penalty ===
         peak_load = np.max(total_per_slot)
         avg_load = np.mean(total_per_slot) + 1e-8
-        peak_ratio = peak_load / avg_load
-        peak_penalty = max(0, peak_ratio - 1.5) * 20
+        peak_penalty = max(0, peak_load / avg_load - 1.5) * 30
 
-        # 4) Constraint violations
-        constraint_penalty = constraints_fn(schedule, rated_powers)
+        # === 6. Grid capacity penalty ===
+        # Steep quadratic penalty for exceeding grid capacity at any hour
+        capacity_penalty = 0.0
+        for h in range(24):
+            if total_per_slot[h] > grid_capacity_kw:
+                excess = total_per_slot[h] - grid_capacity_kw
+                capacity_penalty += (excess ** 2) * 50  # Very steep
 
-        return energy_cost + usage_penalty + 0.1 * peak_penalty + 5 * constraint_penalty
+        # === 7. Constraint check ===
+        sched_96 = np.repeat(sched, 4, axis=1)
+        constraint_penalty = constraints_fn(sched_96, rated_powers)
 
-    # Run DE with higher mutation for exploration
+        # === 8. Forecast alignment penalty (optional) ===
+        forecast_penalty = 0.0
+        if forecast_loads is not None:
+            # Keep optimized demand reasonably close to GRU-predicted demand.
+            forecast_penalty = np.mean(np.abs(total_per_slot - forecast_loads)) * 2.0
+
+        return (energy_cost
+                + comfort_penalty
+                + shift_penalty
+                + consec_penalty
+                + thermostat_penalty
+                + peak_penalty
+                + capacity_penalty
+                + 5 * constraint_penalty
+                + forecast_penalty)
+
+    # Run DE — the model explores and the fitness guides
     de = DifferentialEvolution(
         num_appliances, num_slots,
         population_size=population,
@@ -388,16 +528,12 @@ def quick_optimize(user_schedule_hourly: np.ndarray,
         max_generations=generations
     )
 
-    best_schedule, history = de.optimize(fitness_fn, seed=user_schedule, verbose=False)
+    best_raw, history = de.optimize(fitness_fn, seed=user_schedule_hourly, verbose=False)
+    optimized_hourly = _enforce_on_count(best_raw)
 
-    # Collapse to hourly using majority vote (>=2 of 4 sub-slots ON → hour ON)
-    optimized_hourly = np.zeros((num_appliances, 24))
-    for h in range(24):
-        optimized_hourly[:, h] = (best_schedule[:, h*4:(h+1)*4].mean(axis=1) >= 0.5).astype(float)
-
-    # Compute costs from HOURLY schedules so metrics match what the heatmap shows
-    unoptimized_cost = np.sum(user_schedule_hourly * rated_powers[:, np.newaxis] * prices_hourly * 1.0)
-    optimized_cost = np.sum(optimized_hourly * rated_powers[:, np.newaxis] * prices_hourly * 1.0)
+    # Compute costs
+    unoptimized_cost = np.sum(user_schedule_hourly * rated_powers[:, np.newaxis] * prices_hourly)
+    optimized_cost = np.sum(optimized_hourly * rated_powers[:, np.newaxis] * prices_hourly)
     savings_pct = (1 - optimized_cost / (unoptimized_cost + 1e-8)) * 100
 
     unopt_peak = np.max((user_schedule_hourly * rated_powers[:, np.newaxis]).sum(axis=0))
@@ -406,9 +542,6 @@ def quick_optimize(user_schedule_hourly: np.ndarray,
 
     return {
         "optimized_hourly": optimized_hourly,
-        "optimized_96": best_schedule,
-        "user_96": user_schedule,
-        "prices_96": prices,
         "rated_powers": rated_powers,
         "appliance_names": APPLIANCE_NAMES,
         "unoptimized_cost": float(unoptimized_cost),
@@ -419,3 +552,4 @@ def quick_optimize(user_schedule_hourly: np.ndarray,
         "peak_reduction_pct": float(peak_reduction_pct),
         "history": history,
     }
+
