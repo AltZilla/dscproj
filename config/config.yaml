@@ -109,8 +109,8 @@ federated_gru:
 stackelberg:
   num_iterations: 100
   leader_learning_rate: 0.01
-  follower_comfort_weight: 2.5        # Higher = users value comfort more = more demand
-  supply_capacity_kw: 500.0
+  follower_comfort_weight: 15.0       # Higher = users value comfort more = more demand
+  supply_capacity_kw: 150.0           # Grid capacity — must be close to expected demand for meaningful equilibrium
   price_min: 3.0
   price_max: 15.0
 
