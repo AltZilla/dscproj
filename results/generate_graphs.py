@@ -70,17 +70,21 @@ COLORS = {
 
 
 def _save(fig, name):
-    path = OUT_DIR / f"{name}.png"
-    fig.savefig(path, format="png", bbox_inches="tight", dpi=300)
+    # Save as PDF (required for IEEE submission)
+    pdf_path = OUT_DIR / f"{name}.pdf"
+    fig.savefig(pdf_path, format="pdf", bbox_inches="tight")
+    # Also save PNG for Overleaf preview / dashboard
+    png_path = OUT_DIR / f"{name}.png"
+    fig.savefig(png_path, format="png", bbox_inches="tight", dpi=300)
     plt.close(fig)
-    print(f"  [OK] Saved {path}")
+    print(f"  [OK] Saved {pdf_path} + {png_path}")
 
 
 # ══════════════════════════════════════════════════════════════════════════
 # STEP 1: Run the actual pipeline and collect real data
 # ══════════════════════════════════════════════════════════════════════════
 
-def run_real_pipeline():
+def run_real_pipeline(skip_ml=True):
     """
     Execute the actual project modules and collect all training histories,
     metrics, and optimization results for graph generation.
@@ -98,30 +102,39 @@ def run_real_pipeline():
     from src.constraints import get_constraint_function
 
     config = load_config()
-    results = {}
+    
+    # Check if we should skip ML and load from cache
+    cached = load_cached_results() if skip_ml else None
+    results = cached if cached is not None else {}
+    
+    if not skip_ml or not cached or "gru_predictions" not in results:
+        # ── Stage 2: Preprocessing (loads existing data/processed/) ──
+        print("\n" + "=" * 60)
+        print("LOADING PREPROCESSED DATA")
+        print("=" * 60)
+        preprocessed = run_preprocessing(config)
 
-    # ── Stage 2: Preprocessing (loads existing data/processed/) ──
-    print("\n" + "=" * 60)
-    print("LOADING PREPROCESSED DATA")
-    print("=" * 60)
-    preprocessed = run_preprocessing(config)
+        # ── Stage 3: VAE Training ──
+        print("\n" + "=" * 60)
+        print("TRAINING VAE (collecting epoch histories)")
+        print("=" * 60)
+        vae_results = run_vae(config, preprocessed, device=device)
+        results["vae_history"] = vae_results["history"]
 
-    # ── Stage 3: VAE Training ──
-    print("\n" + "=" * 60)
-    print("TRAINING VAE (collecting epoch histories)")
-    print("=" * 60)
-    vae_results = run_vae(config, preprocessed, device=device)
-    results["vae_history"] = vae_results["history"]
-
-    # ── Stage 4: Federated GRU Training ──
-    print("\n" + "=" * 60)
-    print("TRAINING FEDERATED GRU (collecting round histories)")
-    print("=" * 60)
-    gru_results = run_federated_gru(config, preprocessed, vae_results, device=device)
-    results["gru_history"] = gru_results["history"]
-    results["gru_metrics"] = gru_results["metrics"]
-    results["gru_predictions"] = gru_results["test_predictions"].tolist()
-    results["gru_targets"] = gru_results["test_targets"].tolist()
+        # ── Stage 4: Federated GRU Training ──
+        print("\n" + "=" * 60)
+        print("TRAINING FEDERATED GRU (collecting round histories)")
+        print("=" * 60)
+        gru_results = run_federated_gru(config, preprocessed, vae_results, device=device)
+        results["gru_history"] = gru_results["history"]
+        results["gru_metrics"] = gru_results["metrics"]
+        results["gru_predictions"] = gru_results["test_predictions"].tolist()
+        results["gru_targets"] = gru_results["test_targets"].tolist()
+    else:
+        print("\n" + "=" * 60)
+        print("SKIPPING ML TRAINING (using cached VAE and GRU results)")
+        print("=" * 60)
+        gru_results = {"test_predictions": np.array(results["gru_predictions"])}
 
     # ── Stage 5: Stackelberg Game ──
     print("\n" + "=" * 60)
@@ -132,30 +145,6 @@ def run_real_pipeline():
     results["sg_history"] = sg_results["history"]
     results["sg_eq_price"] = sg_results["equilibrium_price"]
     results["sg_total_demand"] = sg_results["total_demand"]
-
-    # Hourly Stackelberg
-    twin_cfg = config["digital_twin"]
-    pricing_cfg = twin_cfg["pricing"]
-    tou_hourly = np.zeros(24)
-    for period_name in ("off_peak", "shoulder", "peak"):
-        period = pricing_cfg[period_name]
-        for h in period["hours"]:
-            tou_hourly[h] = period["rate"]
-
-    appliance_names = list(twin_cfg["appliances"].keys())
-    rated_powers = np.array([twin_cfg["appliances"][n]["rated_power_kw"] for n in appliance_names])
-    representative_schedule = np.ones((len(appliance_names), 24)) * 0.3
-
-    hourly_sg = run_hourly_stackelberg(
-        tou_prices_hourly=tou_hourly,
-        user_schedule_hourly=representative_schedule,
-        rated_powers=rated_powers,
-        num_users=num_homes,
-        supply_capacity_kw=config["stackelberg"]["supply_capacity_kw"],
-    )
-    results["hourly_sg_prices"] = hourly_sg["hourly_prices"].tolist()
-    results["hourly_sg_demands"] = hourly_sg["hourly_demands"].tolist()
-    results["tou_hourly"] = tou_hourly.tolist()
 
     # ── Stage 6: Differential Evolution ──
     print("\n" + "=" * 60)
@@ -173,6 +162,33 @@ def run_real_pipeline():
     results["de_prices"] = de_results["prices"].tolist()
     results["de_rated_powers"] = de_results["rated_powers"].tolist()
     results["de_appliance_names"] = de_results["appliance_names"]
+
+    # ── Hourly Stackelberg (Uses DE's preferred schedule for realistic peak profile) ──
+    twin_cfg = config["digital_twin"]
+    pricing_cfg = twin_cfg["pricing"]
+    tou_hourly = np.zeros(24)
+    for period_name in ("off_peak", "shoulder", "peak"):
+        period = pricing_cfg[period_name]
+        for h in period["hours"]:
+            tou_hourly[h] = period["rate"]
+
+    appliance_names = de_results["appliance_names"]
+    rated_powers = de_results["rated_powers"]
+    
+    # Convert DE's 96-slot preferred schedule to hourly averages
+    preferred = de_results["preferred_schedule"]
+    representative_schedule = np.array(preferred).reshape(len(appliance_names), 24, 4).mean(axis=2)
+
+    hourly_sg = run_hourly_stackelberg(
+        tou_prices_hourly=tou_hourly,
+        user_schedule_hourly=representative_schedule,
+        rated_powers=rated_powers,
+        num_users=num_homes,
+        supply_capacity_kw=config["stackelberg"]["supply_capacity_kw"],
+    )
+    results["hourly_sg_prices"] = hourly_sg["hourly_prices"].tolist()
+    results["hourly_sg_demands"] = hourly_sg["hourly_demands"].tolist()
+    results["tou_hourly"] = tou_hourly.tolist()
 
     # Save cache
     # Convert numpy arrays in history to lists for JSON serialization
@@ -694,14 +710,8 @@ if __name__ == "__main__":
     print("=" * 60)
     print(f"  Output directory: {OUT_DIR}\n")
 
-    # Try to load cached results first; if unavailable, run full pipeline
-    data = load_cached_results()
-    if data is None:
-        print("  No cached results found. Running full pipeline...")
-        print("  (This may take 5-10 minutes)\n")
-        data = run_real_pipeline()
-    else:
-        print("  Using cached pipeline results.\n")
+    # Always force re-run of pipeline to update SG/DE, but skip ML internally
+    data = run_real_pipeline(skip_ml=True)
 
     generators = [
         ("Graph  1: VAE Reconstruction Loss Convergence", graph_01),

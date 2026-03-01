@@ -392,6 +392,13 @@ def quick_optimize(user_schedule_hourly: np.ndarray,
         for i in range(num_appliances):
             target = target_on[i]
             row = fixed[i]
+
+            # For lighting: force OFF during unoccupied hours first
+            if APPLIANCE_NAMES[i] == "lighting":
+                for h in range(24):
+                    if occupancy[h] == 0:
+                        row[h] = 0.0
+
             on_idx = np.where(row > 0.5)[0]
             off_idx = np.where(row <= 0.5)[0]
             current = len(on_idx)
@@ -401,9 +408,17 @@ def quick_optimize(user_schedule_hourly: np.ndarray,
                 turn_off = on_idx[np.argsort(-costs)][:current - target]
                 fixed[i, turn_off] = 0.0
             elif current < target and len(off_idx) > 0:
-                costs = prices[off_idx]
-                turn_on = off_idx[np.argsort(costs)][:target - current]
-                fixed[i, turn_on] = 1.0
+                # For lighting: only add ON-hours during occupied times
+                if APPLIANCE_NAMES[i] == "lighting":
+                    occupied_off = off_idx[occupancy[off_idx] > 0]
+                    if len(occupied_off) > 0:
+                        costs = prices[occupied_off]
+                        turn_on = occupied_off[np.argsort(costs)][:target - current]
+                        fixed[i, turn_on] = 1.0
+                else:
+                    costs = prices[off_idx]
+                    turn_on = off_idx[np.argsort(costs)][:target - current]
+                    fixed[i, turn_on] = 1.0
         return fixed
 
     def fitness_fn(schedule):
@@ -435,6 +450,14 @@ def quick_optimize(user_schedule_hourly: np.ndarray,
                     else:
                         comfort_penalty += power * 0.5  # minor waste for HVAC/WH
 
+        # Lighting must stay ON when user scheduled it AND people are home
+        # Lighting must turn OFF when nobody is home
+        lighting_idx = APPLIANCE_NAMES.index("lighting")
+        for h in range(24):
+            if h in user_on_hours[lighting_idx] and occupancy[h] > 0 and sched[lighting_idx, h] < 0.5:
+                comfort_penalty += 500
+            if occupancy[h] == 0 and sched[lighting_idx, h] > 0.5:
+                comfort_penalty += 500
         # === 3. Temporal proximity penalty ===
         # Penalize moving ON-hours far from user's original schedule
         # This keeps water heater near morning/evening blocks, etc.
@@ -448,7 +471,9 @@ def quick_optimize(user_schedule_hourly: np.ndarray,
                 min_dist = min(abs(h - uh) for uh in user_on_hours[i])
                 # Quadratic penalty: distance 1 = 1, distance 3 = 9, distance 6 = 36
                 # Increased multiplier so it stays closer to the user's intended block
-                shift_penalty += (min_dist ** 2) * rated_powers[i] * 1.0
+                # EV charger is highly flexible — user just needs it charged, not at a specific time
+                flex = 0.03 if APPLIANCE_NAMES[i] == "ev_charger" else 1.0
+                shift_penalty += (min_dist ** 2) * rated_powers[i] * flex
 
         # === 4. Consecutiveness reward (negative penalty) for sequential appliances ===
         consec_penalty = 0.0
@@ -465,26 +490,64 @@ def quick_optimize(user_schedule_hourly: np.ndarray,
                     consec_penalty += gap * rated_powers[i] * 2
 
         # === 4b. Thermostat pulsing penalty ===
-        # Penalize being continuously ON for multiple hours, since thermostatically 
-        # controlled loads naturally pulse (duty cycle) to maintain temperature setting.
+        # Only penalise consecutive runs LONGER than the user's own longest
+        # block.  If the user scheduled a solid 6-hour HVAC block, allow up
+        # to 6 consecutive hours without penalty.
         thermostat_penalty = 0.0
         THERMOSTAT_APPS = {"hvac", "water_heater"}
         for i, app in enumerate(APPLIANCE_NAMES):
             if app not in THERMOSTAT_APPS:
                 continue
+
+            # Compute user's max consecutive run for this appliance
+            user_on = sorted(user_on_hours[i])
+            user_max_run = 1
+            if len(user_on) > 1:
+                run = 1
+                for k in range(1, len(user_on)):
+                    if user_on[k] - user_on[k-1] == 1:
+                        run += 1
+                        user_max_run = max(user_max_run, run)
+                    else:
+                        run = 1
+
             on_hours = sorted(np.where(sched[i] > 0.5)[0])
             if len(on_hours) <= 1:
                 continue
-            
+
             consecutive_count = 1
             for k in range(1, len(on_hours)):
                 if on_hours[k] - on_hours[k-1] == 1:
                     consecutive_count += 1
-                    # Only penalize if more than 2 consecutive hours, so it groups into blocks of 2
-                    if consecutive_count > 2:
-                        thermostat_penalty += ((consecutive_count - 2) ** 2) * rated_powers[i] * 5.0
+                    if consecutive_count > user_max_run:
+                        thermostat_penalty += ((consecutive_count - user_max_run) ** 2) * rated_powers[i] * 5.0
                 else:
                     consecutive_count = 1
+
+            # Penalize large gaps within user blocks (fragmentation).
+            # 1hr gap = pulsing (OK, saves money during peak).
+            # 3+hr gap = house drifts too far from setpoint (BAD).
+            # Find user's consecutive blocks for this appliance
+            user_blocks = []
+            if user_on:
+                bs, be = user_on[0], user_on[0]
+                for uh in user_on[1:]:
+                    if uh - be == 1:
+                        be = uh
+                    else:
+                        user_blocks.append((bs, be))
+                        bs, be = uh, uh
+                user_blocks.append((bs, be))
+
+            # For each user block, check optimizer's gaps in that range
+            for bs, be in user_blocks:
+                # Allow ±2hr for preheating/precooling
+                block_on = [h for h in on_hours if bs - 2 <= h <= be + 2]
+                if len(block_on) > 1:
+                    for k in range(1, len(block_on)):
+                        gap = block_on[k] - block_on[k - 1]
+                        if gap >= 3:  # 3+hr gap within a block
+                            thermostat_penalty += (gap - 1) ** 2 * rated_powers[i] * 3.0
 
         # === 5. Peak load penalty ===
         peak_load = np.max(total_per_slot)
