@@ -5,32 +5,70 @@
 % ============================================================
 % Instructions:
 %   1. Run: python results/generate_graphs.py
-%   2. Upload this .tex file + all PNGs from results/graphs/ to Overleaf
-%   3. Place graph PNGs in a subfolder called "graphs/" on Overleaf
+%   2. Upload this .tex file + all PDFs from results/graphs/ to Overleaf
+%   3. Place graph PDFs in a subfolder called "graphs/" on Overleaf
 %   4. Compile with pdfLaTeX
 % ============================================================
 
 \documentclass[journal]{IEEEtran}
 
-\usepackage{graphicx}
+% *** GRAPHICS RELATED PACKAGES ***
+\ifCLASSINFOpdf
+  \usepackage[pdftex]{graphicx}
+  \graphicspath{{graphs/}}
+  \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  \usepackage[dvips]{graphicx}
+  \graphicspath{{graphs/}}
+  \DeclareGraphicsExtensions{.eps}
+\fi
+
+% *** MATH PACKAGES ***
 \usepackage{amsmath,amssymb,amsfonts}
+
+% *** CITATION PACKAGES ***
 \usepackage{cite}
+
+% *** TABLE PACKAGES ***
 \usepackage{booktabs}
 \usepackage{multirow}
-\usepackage{hyperref}
-\usepackage{xcolor}
+
+% *** FLOAT PACKAGES ***
 \usepackage{float}
-\usepackage{algorithm}
-\usepackage{bm}
+
+% *** URL PACKAGES ***
+\usepackage{url}
 
 % Indian Rupee symbol
 \newcommand{\rupmark}{\text{\small\textrm{\textup{INR}}}}
 
+% correct bad hyphenation here
+\hyphenation{fed-er-ated Stack-el-berg pri-va-cy op-ti-mi-za-tion}
+
 \begin{document}
 
 \title{Privacy-Preserving Load Forecasting and Energy Optimization in IoT-Enabled Smart Homes Using Federated Learning and Game-Theoretic Scheduling}
-\author{Shresht Kumar Linga (24BCE5508), Marun VP (24BCE5544)}
+
+\author{Shresht~Kumar~Linga~(24BCE5508)
+        and~Marun~VP~(24BCE5544)% <-this % stops a space
+\thanks{S.~K.~Linga and M.~VP are with the School of Computer Science
+and Engineering, Vellore Institute of Technology, Vellore, India.}% <-this % stops a space
+\thanks{Manuscript prepared March 2026.}}
+
+\markboth{IEEE Journal,~Vol.~XX, No.~X, March~2026}%
+{Linga \MakeLowercase{\textit{et al.}}: Privacy-Preserving Load Forecasting in IoT-Enabled Smart Homes}
+
 \maketitle
+
+\begin{abstract}
+This paper presents a privacy-preserving hybrid intelligent framework for energy optimization in IoT-enabled smart homes. The proposed system integrates six sequential stages: a Digital Twin Simulator for synthetic data generation, a $\beta$-Variational Autoencoder ($\beta$-VAE) for latent feature extraction, a Federated Learning-based Gated Recurrent Unit (FedGRU) network for privacy-preserving load forecasting, a Hierarchical Stackelberg Game for dynamic electricity pricing, a Differential Evolution (DE) optimizer for constrained multi-objective schedule optimization, and an interactive visualization dashboard. Experimental results on a synthetic dataset of 50 smart homes over 30 days demonstrate that the framework achieves 46.2\% daily energy cost reduction, 23.0\% peak load reduction, and robust forecasting accuracy (MAE = 1.846\,kW) while preserving user data privacy through federated learning. Comparative evaluation against three recent IEEE baselines confirms balanced superiority across cost savings, comfort preservation, privacy, convergence speed, peak reduction, and forecast accuracy.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Smart home energy management, federated learning, privacy-preserving load forecasting, Stackelberg game, differential evolution, $\beta$-VAE, IoT, demand response.
+\end{IEEEkeywords}
+
+\IEEEpeerreviewmaketitle
 
 % ############################################################
 %              SECTION 1: PROPOSED SYSTEM
@@ -60,14 +98,14 @@ The proposed system architecture is shown in Fig.~\ref{fig:architecture}. The pi
 
 The Digital Twin module creates a high-fidelity simulation of $N = 50$ smart homes, each equipped with $A = 7$ controllable appliances. Each home is simulated for $D = 30$ days at 15-minute resolution ($\Delta t = 0.25$ h), producing $T = 96$ time slots per day and a total of $N \times D \times T = 144{,}000$ records.
 
-\textbf{Occupancy Model.} Occupant behavior is modeled as a 3-state discrete-time Markov chain with states $\mathcal{S} = \{s_0 = \text{Home}, s_1 = \text{Away}, s_2 = \text{Sleeping}\}$. The occupancy state at time $t$ evolves according to:
+\textit{Occupancy Model.} Occupant behavior is modeled as a 3-state discrete-time Markov chain with states $\mathcal{S} = \{s_0 = \text{Home}, s_1 = \text{Away}, s_2 = \text{Sleeping}\}$. The occupancy state at time $t$ evolves according to:
 \begin{equation}
     P(X_{t+1} = s_j | X_t = s_i) = \mathbf{M}_\tau(i, j)
     \label{eq:markov}
 \end{equation}
-where $\mathbf{M}_\tau \in \mathbb{R}^{3 \times 3}$ is the time-dependent transition matrix, with $\tau \in \{\text{night}, \text{day}, \text{evening}\}$ selecting the appropriate matrix based on the current hour. The time-varying matrices capture realistic behavioral patterns: high sleep probability during night hours ($\mathbf{M}_{\text{night}}[0,2] = 0.8$), high away probability during day ($\mathbf{M}_{\text{day}}[0,1] = 0.35$), and high home probability during evening ($\mathbf{M}_{\text{evening}}[1,0] = 0.6$).
+where $X_t$ is the occupancy random variable at time step $t$, $s_i$ and $s_j$ are occupancy states from $\mathcal{S}$, and $\mathbf{M}_\tau \in \mathbb{R}^{3 \times 3}$ is the time-dependent transition matrix indexed by $(i, j)$. The time period $\tau \in \{\text{night}, \text{day}, \text{evening}\}$ selects the appropriate matrix based on the current hour. The time-varying matrices capture realistic behavioral patterns: high sleep probability during night hours ($\mathbf{M}_{\text{night}}[0,2] = 0.8$), high away probability during day ($\mathbf{M}_{\text{day}}[0,1] = 0.35$), and high home probability during evening ($\mathbf{M}_{\text{evening}}[1,0] = 0.6$).
 
-\textbf{Thermal Environment Model.} The outdoor temperature follows a sinusoidal daily cycle with stochastic perturbation:
+\textit{Thermal Environment Model.} The outdoor temperature follows a sinusoidal daily cycle with stochastic perturbation:
 \begin{equation}
     T_{\text{out}}(t) = T_{\text{base}} + A_T \cos\left(\frac{2\pi(h-14)}{24}\right) + \epsilon_T
     \label{eq:outdoor_temp}
@@ -81,14 +119,14 @@ Indoor temperature evolves via thermal dynamics with HVAC coupling:
 \end{equation}
 where $\alpha = 0.05$ is the thermal decay rate, $\eta = 2.0 \cdot \Delta t$ is the HVAC cooling rate per slot, and $u_{\text{HVAC}}(t) \in \{-1, 0, +1\}$ indicates cooling, idle, or heating mode based on comfort bounds $[T_{\min}, T_{\max}] = [22, 26]^\circ$C.
 
-\textbf{Appliance Activation Model.} Each appliance $a$ has a time-varying activation probability modulated by occupancy and environmental conditions:
+\textit{Appliance Activation Model.} Each appliance $a$ has a time-varying activation probability modulated by occupancy and environmental conditions:
 \begin{equation}
     P_a(t) = \min\left(p_a^{\text{base}}(h) \cdot \gamma_{\text{occ}}(X_t) \cdot \gamma_{\text{env}}(T_{\text{in}}) \cdot \xi_{\text{home}}, \; 1.0\right)
     \label{eq:activation}
 \end{equation}
 where $p_a^{\text{base}}(h)$ is the base hourly schedule, $\gamma_{\text{occ}} \in \{0.05, 0.2, 1.0\}$ for Away/Sleeping/Home states, $\gamma_{\text{env}}$ is the temperature-responsive factor for HVAC, and $\xi_{\text{home}} \sim \mathcal{U}(0.7, 1.3)$ introduces per-home behavioral variation.
 
-\textbf{Time-of-Use Pricing.} The electricity pricing follows a three-tier TOU structure:
+\textit{Time-of-Use Pricing.} The electricity pricing follows a three-tier TOU structure:
 \begin{equation}
     p(h) = \begin{cases}
         2.0 \; \text{INR/kWh} & h \in [0, 5] \; \text{(Off-Peak)} \\
@@ -97,31 +135,33 @@ where $p_a^{\text{base}}(h)$ is the base hourly schedule, $\gamma_{\text{occ}} \
     \end{cases}
     \label{eq:tou}
 \end{equation}
+where $p(h)$ is the electricity price at hour $h \in \{0, 1, \ldots, 23\}$.
 
 % ────────────────────────────────────────────────────────
 \subsubsection{Data Preprocessing Pipeline}
 
 The raw simulation data undergoes four preprocessing stages to prepare it for downstream ML models.
 
-\textbf{Outlier Detection.} Outliers are detected and clipped using the Interquartile Range (IQR) method:
+\textit{Outlier Detection.} Outliers are detected and clipped using the Interquartile Range (IQR) method:
 \begin{equation}
     x_{\text{clipped}} = \text{clip}\left(x, \; Q_1 - 1.5 \cdot \text{IQR}, \; Q_3 + 1.5 \cdot \text{IQR}\right)
     \label{eq:iqr}
 \end{equation}
-where $\text{IQR} = Q_3 - Q_1$ is the interquartile range.
+where $x$ is the original feature value, $x_{\text{clipped}}$ is the clipped output, $Q_1$ and $Q_3$ are the first and third quartiles of the feature distribution, and $\text{IQR} = Q_3 - Q_1$ is the interquartile range.
 
-\textbf{Cyclical Time Encoding.} Time features are encoded as cyclical sine-cosine pairs to preserve periodicity:
+\textit{Cyclical Time Encoding.} Time features are encoded as cyclical sine-cosine pairs to preserve periodicity:
 \begin{equation}
     f_{\sin}(t) = \sin\left(\frac{2\pi \cdot t}{P}\right), \quad f_{\cos}(t) = \cos\left(\frac{2\pi \cdot t}{P}\right)
     \label{eq:cyclical}
 \end{equation}
-where $P$ is the period (24 for hours, 96 for daily slots).
+where $f_{\sin}(t)$ and $f_{\cos}(t)$ are the sine and cosine encoded features at time index $t$, and $P$ is the period (24 for hours, 96 for daily slots).
 
-\textbf{MinMax Normalization.} All features are normalized to $[0, 1]$:
+\textit{MinMax Normalization.} All features are normalized to $[0, 1]$:
 \begin{equation}
     \hat{x}_i = \frac{x_i - x_{\min}}{x_{\max} - x_{\min}}
     \label{eq:minmax}
 \end{equation}
+where $x_i$ is the original feature value, $\hat{x}_i$ is the normalized value, and $x_{\min}$ and $x_{\max}$ are the minimum and maximum values of that feature across the dataset.
 
 After preprocessing, the feature vector has dimensionality $d = 19$ per record, comprising 7 appliance power readings, 3 environmental variables, 2 cyclical time encodings, and 7 contextual features (price, occupancy, weekend flag, rolling statistics, lag features).
 
@@ -130,7 +170,7 @@ After preprocessing, the feature vector has dimensionality $d = 19$ per record, 
 
 The $\beta$-VAE performs nonlinear dimensionality reduction from $d = 19$ raw features to a compact $d_z = 16$-dimensional latent space, capturing essential behavioral patterns while filtering noise.
 
-\textbf{Encoder Network.} The encoder $q_\phi(z|x)$ maps input $\mathbf{x} \in \mathbb{R}^{19}$ to the parameters of a Gaussian posterior:
+\textit{Encoder Network.} The encoder $q_\phi(z|x)$ maps input $\mathbf{x} \in \mathbb{R}^{19}$ to the parameters of a Gaussian posterior:
 \begin{equation}
     \mathbf{h} = \text{BN}(\text{ReLU}(\mathbf{W}_1 \mathbf{x} + \mathbf{b}_1))
     \label{eq:encoder_h}
@@ -139,22 +179,23 @@ The $\beta$-VAE performs nonlinear dimensionality reduction from $d = 19$ raw fe
     \boldsymbol{\mu} = \mathbf{W}_\mu \mathbf{h} + \mathbf{b}_\mu, \quad \log \boldsymbol{\sigma}^2 = \mathbf{W}_\sigma \mathbf{h} + \mathbf{b}_\sigma
     \label{eq:encoder_params}
 \end{equation}
-where $\text{BN}(\cdot)$ denotes batch normalization. The architecture uses two hidden layers with dimensions $64 \to 32 \to 16$.
+where $\mathbf{h}$ is the hidden representation, $\mathbf{W}_1$ and $\mathbf{b}_1$ are the weight matrix and bias of the first fully connected layer, $\text{BN}(\cdot)$ denotes batch normalization, $\text{ReLU}(\cdot) = \max(0, \cdot)$ is the rectified linear activation, $\boldsymbol{\mu}$ and $\log \boldsymbol{\sigma}^2$ are the mean and log-variance vectors of the latent Gaussian posterior, and $\mathbf{W}_\mu$, $\mathbf{b}_\mu$, $\mathbf{W}_\sigma$, $\mathbf{b}_\sigma$ are their respective projection weights and biases. The architecture uses two hidden layers with dimensions $64 \to 32 \to 16$.
 
-\textbf{Reparameterization Trick.} To enable gradient-based optimization through the stochastic sampling, we use:
+\textit{Reparameterization Trick.} To enable gradient-based optimization through the stochastic sampling, we use:
 \begin{equation}
     \mathbf{z} = \boldsymbol{\mu} + \boldsymbol{\sigma} \odot \boldsymbol{\epsilon}, \quad \boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})
     \label{eq:reparam}
 \end{equation}
-where $\odot$ denotes element-wise multiplication.
+where $\mathbf{z} \in \mathbb{R}^{d_z}$ is the sampled latent vector, $\boldsymbol{\mu}$ and $\boldsymbol{\sigma}$ are the encoder-predicted mean and standard deviation, $\boldsymbol{\epsilon}$ is a noise vector sampled from the standard normal distribution $\mathcal{N}(\mathbf{0}, \mathbf{I})$, and $\odot$ denotes element-wise (Hadamard) multiplication.
 
-\textbf{Decoder Network.} The decoder $p_\theta(x|z)$ reconstructs the input from the latent code: $\hat{\mathbf{x}} = \sigma(\mathbf{W}_3(\text{ReLU}(\mathbf{W}_2 \mathbf{z} + \mathbf{b}_2)) + \mathbf{b}_3)$, where $\sigma(\cdot)$ is the sigmoid activation.
+\textit{Decoder Network.} The decoder $p_\theta(x|z)$ reconstructs the input from the latent code: $\hat{\mathbf{x}} = \sigma(\mathbf{W}_3(\text{ReLU}(\mathbf{W}_2 \mathbf{z} + \mathbf{b}_2)) + \mathbf{b}_3)$, where $\sigma(\cdot)$ is the sigmoid activation.
 
-\textbf{$\beta$-VAE Loss Function.} The training objective maximizes the Evidence Lower Bound (ELBO) with a controlled KL weight $\beta = 0.5$:
+\textit{$\beta$-VAE Loss Function.} The training objective maximizes the Evidence Lower Bound (ELBO) with a controlled KL weight $\beta = 0.5$:
 \begin{equation}
     \mathcal{L}_{\beta\text{-VAE}} = \underbrace{\frac{1}{d}\sum_{i=1}^{d}(x_i - \hat{x}_i)^2}_{\mathcal{L}_{\text{recon}}} + \beta \cdot \underbrace{\left(-\frac{1}{2}\sum_{j=1}^{d_z}\left(1 + \log\sigma_j^2 - \mu_j^2 - \sigma_j^2\right)\right)}_{D_{KL}(q_\phi(z|x) \| p(z))}
     \label{eq:vae_loss}
 \end{equation}
+where $\mathcal{L}_{\beta\text{-VAE}}$ is the total loss, $d = 19$ is the input feature dimension, $x_i$ and $\hat{x}_i$ are the $i$-th original and reconstructed feature values, $\mathcal{L}_{\text{recon}}$ is the mean squared reconstruction error, $\beta = 0.5$ is the KL divergence weight, $d_z = 16$ is the latent dimension, $\mu_j$ and $\sigma_j^2$ are the mean and variance of the $j$-th latent dimension output by the encoder, $q_\phi(z|x)$ is the learned approximate posterior, and $p(z) = \mathcal{N}(\mathbf{0}, \mathbf{I})$ is the standard Gaussian prior.
 
 The $\beta = 0.5$ weighting provides a controlled trade-off: values below $1.0$ allow higher reconstruction fidelity at the cost of less regularized latent spaces, while preventing the ``KL vanishing'' problem ($\beta \to 0$).
 
@@ -163,7 +204,7 @@ The $\beta = 0.5$ weighting provides a controlled trade-off: values below $1.0$ 
 
 The FedGRU module trains a load forecasting model across $K = 50$ distributed clients (smart homes) without exposing raw consumption data, using the FedAvg protocol.
 
-\textbf{GRU Cell Equations.} Each GRU cell at time step $t$ computes:
+\textit{GRU Cell Equations.} Each GRU cell at time step $t$ computes:
 \begin{equation}
     \mathbf{r}_t = \sigma(\mathbf{W}_r [\mathbf{h}_{t-1}, \mathbf{x}_t] + \mathbf{b}_r)
     \label{eq:gru_reset}
@@ -182,36 +223,37 @@ The FedGRU module trains a load forecasting model across $K = 50$ distributed cl
 \end{equation}
 where $\mathbf{r}_t$ is the reset gate, $\mathbf{u}_t$ is the update gate, $\tilde{\mathbf{h}}_t$ is the candidate hidden state, and $[\cdot, \cdot]$ denotes concatenation. The input $\mathbf{x}_t \in \mathbb{R}^{16}$ is the VAE latent vector at time $t$, and $\mathbf{h}_t \in \mathbb{R}^{64}$ is the hidden state. Two stacked GRU layers process sequences of length $L = 16$ (4 hours at 15-minute resolution).
 
-\textbf{Prediction Head.} The final hidden state is passed through a two-layer feedforward network:
+\textit{Prediction Head.} The final hidden state is passed through a two-layer feedforward network:
 \begin{equation}
     \hat{y}_{t+1} = \mathbf{W}_o \cdot \text{ReLU}(\mathbf{W}_p \cdot \mathbf{h}_L + \mathbf{b}_p) + \mathbf{b}_o
     \label{eq:prediction}
 \end{equation}
-where $\hat{y}_{t+1}$ is the predicted total power consumption at the next time step. To ensure the model avoids exploding gradients over the long $L=16$ sequences, spectral unrolling of the temporal dynamics bounds the Lipschitz constant of the hidden state transition:
+where $\hat{y}_{t+1}$ is the predicted total power consumption at the next time step, $\mathbf{h}_L \in \mathbb{R}^{64}$ is the GRU hidden state at the final sequence position $L$, $\mathbf{W}_p$ and $\mathbf{b}_p$ are the weight and bias of the intermediate projection layer, $\text{ReLU}(\cdot) = \max(0, \cdot)$ is the rectified linear activation, and $\mathbf{W}_o$ and $\mathbf{b}_o$ are the weight and bias of the output layer. To ensure the model avoids exploding gradients over the long $L=16$ sequences, spectral unrolling of the temporal dynamics bounds the Lipschitz constant of the hidden state transition:
 \begin{equation}
     \|\nabla_{\mathbf{h}_{t-1}} \mathbf{h}_t\|_2 \leq \sup_{\mathbf{x}} \left\| \text{diag}(\mathbf{u}_t \odot \tilde{\mathbf{h}}'_t) \mathbf{W}_h \right\|_2 < 1.0
     \label{eq:gru_lipschitz}
 \end{equation}
-This establishes the theoretical stability of the temporal feature maps.
+where $\|\cdot\|_2$ is the spectral (operator) norm, $\nabla_{\mathbf{h}_{t-1}} \mathbf{h}_t$ is the Jacobian of the hidden state with respect to the previous hidden state, $\text{diag}(\cdot)$ constructs a diagonal matrix, $\mathbf{u}_t$ is the update gate vector, $\tilde{\mathbf{h}}'_t$ is the derivative of the candidate hidden state activation, and $\mathbf{W}_h$ is the candidate hidden state weight matrix. This establishes the theoretical stability of the temporal feature maps.
 
-\textbf{Federated Averaging (FedAvg).} In each communication round $r$, a random subset $S_r$ of $\lceil 0.4K \rceil = 20$ clients is selected. Each client $k \in S_r$ trains a local copy of the global model for $E = 5$ local epochs using its private data:
+\textit{Federated Averaging (FedAvg).} In each communication round $r$, a random subset $S_r$ of $\lceil 0.4K \rceil = 20$ clients is selected. Each client $k \in S_r$ trains a local copy of the global model for $E = 5$ local epochs using its private data:
 \begin{equation}
     \mathbf{w}_k^{(r+1)} = \mathbf{w}_k^{(r)} - \eta \nabla_{\mathbf{w}} \mathcal{L}_k(\mathbf{w}_k^{(r)})
     \label{eq:local_sgd}
 \end{equation}
-where $\mathcal{L}_k = \frac{1}{n_k}\sum_{i=1}^{n_k}(\hat{y}_i - y_i)^2$ is the local MSE loss. After local training, the server aggregates using weighted averaging:
+where $\mathbf{w}_k^{(r)}$ is the model weight vector for client $k$ at round $r$, $\eta = 0.001$ is the learning rate, $\nabla_{\mathbf{w}} \mathcal{L}_k$ is the gradient of the local loss with respect to the weights, and $\mathcal{L}_k = \frac{1}{n_k}\sum_{i=1}^{n_k}(\hat{y}_i - y_i)^2$ is the local MSE loss computed over $n_k$ samples. After local training, the server aggregates using weighted averaging:
 \begin{equation}
     \mathbf{w}_{\text{global}}^{(r+1)} = \sum_{k \in S_r} \frac{n_k}{\sum_{j \in S_r} n_j} \cdot \mathbf{w}_k^{(r+1)}
     \label{eq:fedavg}
 \end{equation}
+where $\mathbf{w}_{\text{global}}^{(r+1)}$ is the updated global model, $n_k$ is the number of training samples held by client $k$, and the weighting fraction $\frac{n_k}{\sum_{j \in S_r} n_j}$ ensures clients with more data contribute proportionally.
 This process repeats for $R = 20$ communication rounds. Raw data never leaves individual homes, providing strong privacy guarantees, bounded theoretically by the federated convergence characteristic length:
 \begin{equation}
     \mathcal{O}\left(\frac{\kappa}{\mu R E} + \frac{\sigma^2}{\sqrt{N K R E}}\right)
     \label{eq:fed_convergence}
 \end{equation}
-where $\kappa$ is the condition number, and $\sigma^2$ is the variance of the local gradients.
+where $\kappa$ is the condition number of the loss landscape, $\mu$ is the strong convexity constant, $R$ is the number of communication rounds, $E$ is the number of local epochs per round, $\sigma^2$ is the variance of the local gradients across clients, $N$ is the number of participating homes, and $K$ is the total number of clients.
 
-\textbf{Evaluation Metrics.} Model performance is measured using three complementary metrics:
+\textit{Evaluation Metrics.} Model performance is measured using three complementary metrics:
 \begin{equation}
     \text{MAE} = \frac{1}{n}\sum_{i=1}^{n}|\hat{y}_i - y_i|, \quad \text{RMSE} = \sqrt{\frac{1}{n}\sum_{i=1}^{n}(\hat{y}_i - y_i)^2}
     \label{eq:mae_rmse}
@@ -220,51 +262,54 @@ where $\kappa$ is the condition number, and $\sigma^2$ is the variance of the lo
     \text{MAPE} = \frac{100}{n}\sum_{i=1}^{n}\left|\frac{y_i - \hat{y}_i}{y_i}\right|, \quad \forall \; |y_i| > 0.1
     \label{eq:mape}
 \end{equation}
+where $n$ is the total number of test samples, $y_i$ is the $i$-th ground truth power consumption value, $\hat{y}_i$ is the corresponding model prediction, and the MAPE threshold $|y_i| > 0.1$ excludes near-zero ground truth values that would cause division instability.
 
 % ────────────────────────────────────────────────────────
 \subsubsection{Hierarchical Stackelberg Game Pricing}
 
 The dynamic pricing mechanism is formulated as a single-leader multi-follower Stackelberg game between the grid operator (leader) and $N = 50$ smart home users (followers).
 
-\textbf{Follower (User) Utility.} Each user $i$ has a concave utility function with diminishing returns:
+\textit{Follower (User) Utility.} Each user $i$ has a concave utility function with diminishing returns:
 \begin{equation}
     U_i(c_i) = w_i \sqrt{c_i}
     \label{eq:user_utility}
 \end{equation}
-where $c_i$ is the consumption and $w_i \sim 15.0 \cdot \mathcal{U}(0.8, 1.2)$ is the comfort weight. Given price $p$, user $i$ maximizes net utility $U_i(c_i) - p \cdot c_i$.
+where $U_i(c_i)$ is the utility of user $i$, $c_i$ is the user's electricity consumption in kW, and $w_i \sim 15.0 \cdot \mathcal{U}(0.8, 1.2)$ is a randomized comfort weight sampled from a uniform distribution to model heterogeneous user preferences. Given price $p$ (in INR/kWh), user $i$ maximizes net utility $U_i(c_i) - p \cdot c_i$.
 
-\textbf{Follower Best Response.} Setting $\frac{\partial}{\partial c_i}[U_i - p \cdot c_i] = 0$:
+\textit{Follower Best Response.} Setting $\frac{\partial}{\partial c_i}[U_i - p \cdot c_i] = 0$:
 \begin{equation}
     \frac{w_i}{2\sqrt{c_i^*}} = p \implies c_i^*(p) = \min\left(\left(\frac{w_i}{2p}\right)^2, \; C_{\max,i}\right)
     \label{eq:best_response}
 \end{equation}
-where $C_{\max,i}$ is the maximum consumption capacity derived from appliance rated powers scaled by a realistic capacity factor ($\sim$4.9\,kW per home).
+where $c_i^*(p)$ is the optimal consumption of user $i$ as a function of price $p$, $w_i$ is the user's comfort weight, and $C_{\max,i}$ is the maximum consumption capacity derived from appliance rated powers scaled by a realistic capacity factor ($\sim$4.9\,kW per home). The $\min$ operator clips the response to prevent physically infeasible consumption.
 
-\textbf{Leader (Grid Operator) Objective.} The leader maximizes profit subject to supply capacity $K = 150$ kW:
+\textit{Leader (Grid Operator) Objective.} The leader maximizes profit subject to supply capacity $K = 150$ kW:
 \begin{equation}
     \max_p \; \Pi(p) = p \cdot \sum_{i=1}^{N} c_i^*(p) - \frac{1}{2}\max\left(0, \sum_{i=1}^{N}c_i^*(p) - K\right)^2
     \label{eq:leader_obj}
 \end{equation}
-The first term is revenue, and the second is a quadratic penalty for exceeding grid capacity.
+where $\Pi(p)$ is the leader's profit function, $p$ is the price set by the leader, $N = 50$ is the number of follower users, $c_i^*(p)$ is each follower's best response consumption, and $K = 150$\,kW is the total supply capacity. The first term is revenue, and the second is a quadratic penalty for exceeding grid capacity.
 
-\textbf{Equilibrium Computation.} The Stackelberg equilibrium $p^*$ is found via iterative grid search with progressive refinement. In each of 50 iterations, the price range is narrowed around the current best, evaluating 30 candidate prices per iteration. The equilibrium satisfies:
+\textit{Equilibrium Computation.} The Stackelberg equilibrium $p^*$ is found via iterative grid search with progressive refinement. In each of 50 iterations, the price range is narrowed around the current best, evaluating 30 candidate prices per iteration. The equilibrium satisfies:
 \begin{equation}
     \frac{\partial \Pi}{\partial p}\bigg|_{p=p^*} = 0, \quad p^* \in [p_{\min}, p_{\max}] = [3, 15] \; \text{INR/kWh}
     \label{eq:equilibrium}
 \end{equation}
+where $\Pi$ is the leader's profit, $p^*$ is the Stackelberg equilibrium price, $\frac{\partial \Pi}{\partial p}$ is the marginal profit with respect to price, and $p_{\min} = 3$ and $p_{\max} = 15$\,INR/kWh bound the feasible price range.
 
-\textbf{Hourly Stackelberg.} The game runs independently for each of 24 hours, with hourly demand profiles derived from the GRU forecaster:
+\textit{Hourly Stackelberg.} The game runs independently for each of 24 hours, with hourly demand profiles derived from the GRU forecaster:
 \begin{equation}
     p_h^{\text{SG}} = \arg\max_p \Pi_h(p), \quad h = 0, 1, \ldots, 23
     \label{eq:hourly_sg}
 \end{equation}
+where $p_h^{\text{SG}}$ is the Stackelberg equilibrium price at hour $h$, and $\Pi_h(p)$ is the leader's profit function at hour $h$ computed using the hourly demand profile derived from the GRU forecaster.
 
 % ────────────────────────────────────────────────────────
 \subsubsection{Differential Evolution (DE) Schedule Optimization}
 
 The DE module optimizes binary appliance schedules $\mathbf{S} \in \{0,1\}^{A \times T}$ where $A = 7$ appliances and $T = 96$ time slots (15-minute resolution), using the DE/rand/1/bin strategy.
 
-\textbf{Initial Population.} A population of $N_p = 100$ candidate solutions is initialized. The first 20\% are seeded from the user's preferred schedule with 10--30\% random bit flips to ensure diversity:
+\textit{Initial Population.} A population of $N_p = 100$ candidate solutions is initialized. The first 20\% are seeded from the user's preferred schedule with 10--30\% random bit flips to ensure diversity:
 \begin{equation}
     \mathbf{S}_i^{(0)} = \begin{cases}
         \mathbf{S}_{\text{pref}} \oplus \mathcal{B}(0.1 \text{--} 0.3) & i \leq N_p/5 \\
@@ -272,16 +317,16 @@ The DE module optimizes binary appliance schedules $\mathbf{S} \in \{0,1\}^{A \t
     \end{cases}
     \label{eq:init_pop}
 \end{equation}
-where $\mathcal{B}(\rho)$ denotes a Bernoulli mask with probability $\rho$.
+where $\mathbf{S}_i^{(0)}$ is the $i$-th initial candidate schedule, $\mathbf{S}_{\text{pref}}$ is the user's preferred (default) schedule, $\oplus$ denotes element-wise XOR (bit-flip) operation, $\mathcal{B}(\rho)$ denotes a Bernoulli mask where each element is 1 with probability $\rho$, and $N_p = 100$ is the population size.
 
-\textbf{Mutation.} For each individual $\mathbf{S}_i$, a mutant vector is generated using DE/rand/1:
+\textit{Mutation.} For each individual $\mathbf{S}_i$, a mutant vector is generated using DE/rand/1:
 \begin{equation}
     \mathbf{v}_i = \mathbf{S}_{r_1} + F \cdot (\mathbf{S}_{r_2} - \mathbf{S}_{r_3})
     \label{eq:mutation}
 \end{equation}
-where $r_1, r_2, r_3$ are distinct random indices, and $F = 0.8$ is the mutation factor. The continuous mutant is binarized via a sigmoid threshold: $\mathbf{v}_i^{\text{bin}} = \mathbb{1}[\sigma(5(\mathbf{v}_i - 0.5)) > 0.5]$.
+where $\mathbf{v}_i$ is the continuous mutant vector for individual $i$, $\mathbf{S}_{r_1}$, $\mathbf{S}_{r_2}$, $\mathbf{S}_{r_3}$ are three distinct randomly selected individuals from the population, $F = 0.8$ is the mutation scaling factor, and the subtraction $\mathbf{S}_{r_2} - \mathbf{S}_{r_3}$ produces the difference vector. The continuous mutant is binarized via a sigmoid threshold: $\mathbf{v}_i^{\text{bin}} = \mathbb{1}[\sigma(5(\mathbf{v}_i - 0.5)) > 0.5]$, where $\mathbb{1}[\cdot]$ is the indicator function and $\sigma(\cdot)$ is the sigmoid function.
 
-\textbf{Binomial Crossover.} A trial vector is formed by component-wise selection:
+\textit{Binomial Crossover.} A trial vector is formed by component-wise selection:
 \begin{equation}
     u_{i,j} = \begin{cases}
         v_{i,j}^{\text{bin}} & \text{if } \text{rand}(0,1) < CR \text{ or } j = j_{\text{rand}} \\
@@ -289,9 +334,9 @@ where $r_1, r_2, r_3$ are distinct random indices, and $F = 0.8$ is the mutation
     \end{cases}
     \label{eq:crossover}
 \end{equation}
-where $CR = 0.9$ is the crossover rate and $j_{\text{rand}}$ ensures at least one dimension from the mutant.
+where $u_{i,j}$ is the $j$-th component of the trial vector for individual $i$, $v_{i,j}^{\text{bin}}$ is the corresponding binarized mutant component, $S_{i,j}$ is the current target individual's $j$-th component, $CR = 0.9$ is the crossover rate, $\text{rand}(0,1)$ is a uniform random number, and $j_{\text{rand}}$ is a randomly chosen index that ensures at least one dimension is inherited from the mutant.
 
-\textbf{Selection.} The trial replaces the target only if it achieves lower fitness:
+\textit{Selection.} The trial replaces the target only if it achieves lower fitness:
 \begin{equation}
     \mathbf{S}_i^{(g+1)} = \begin{cases}
         \mathbf{u}_i & \text{if } f(\mathbf{u}_i) \leq f(\mathbf{S}_i^{(g)}) \\
@@ -299,8 +344,9 @@ where $CR = 0.9$ is the crossover rate and $j_{\text{rand}}$ ensures at least on
     \end{cases}
     \label{eq:selection}
 \end{equation}
+where $\mathbf{S}_i^{(g)}$ is the $i$-th individual at generation $g$, $\mathbf{u}_i$ is the trial vector, $f(\cdot)$ is the fitness function, and $\mathbf{S}_i^{(g+1)}$ is the survivor that proceeds to the next generation.
 
-\textbf{Multi-Objective Fitness Function.} The fitness function aggregates eight weighted penalty terms:
+\textit{Multi-Objective Fitness Function.} The fitness function aggregates eight weighted penalty terms:
 \begin{equation}
 \begin{aligned}
     f(\mathbf{S}) = & \; \underbrace{\sum_{a,h} S_{a,h} \cdot P_a \cdot p_h}_{\Phi_{\text{cost}}} + \underbrace{\sum_{a \in \mathcal{C}} \phi_{\text{comf}}(a,h)}_{\Phi_{\text{comfort}}} + \underbrace{\sum_{a,h} d_{\min}^2(h) \cdot P_a}_{\Phi_{\text{shift}}} \\
@@ -310,7 +356,7 @@ where $CR = 0.9$ is the crossover rate and $j_{\text{rand}}$ ensures at least on
 \end{aligned}
 \label{eq:fitness}
 \end{equation}
-where $\Phi_{\text{cost}}$ is the blended energy cost (TOU + Stackelberg), $\Phi_{\text{comfort}}$ penalizes comfort appliances (HVAC, lighting, water heater) being OFF during occupied hours, $\Phi_{\text{shift}}$ is a quadratic temporal proximity penalty that discourages moving ON-hours far from the user's original schedule, $\Phi_{\text{consec}}$ rewards consecutive ON-hours for sequential appliances (washer, dryer), $\Phi_{\text{thermo}}$ penalizes excessive consecutive operation of thermostatically controlled loads, $\Phi_{\text{peak}}$ penalizes the peak-to-average ratio exceeding 1.5, $\Phi_{\text{grid}}$ applies a steep quadratic penalty for exceeding grid capacity $K$, and $\Phi_{\text{forecast}}$ aligns the optimized demand with GRU-forecasted load profiles. The ON-count per appliance is preserved as a hard constraint through a repair operator.
+where $f(\mathbf{S})$ is the total fitness (lower is better), $S_{a,h} \in \{0,1\}$ is the ON/OFF state of appliance $a$ at time slot $h$, $P_a$ is the rated power (kW) of appliance $a$, $p_h$ is the blended electricity price at hour $h$, $\mathcal{C}$ is the set of comfort appliances (HVAC, lighting, water heater), $\phi_{\text{comf}}(a,h)$ is the per-slot comfort violation penalty, $d_{\min}(h)$ is the minimum temporal distance from the user's preferred ON-slots, $\mathcal{Q}$ is the set of sequential appliances (washer, dryer), $g_a$ is the number of ON-block gaps for appliance $a$, $\mathcal{T}$ is the set of thermostatically controlled loads, $n_c$ is the count of consecutive ON-slots, $L_{\max} = \max_h L_h$ and $\bar{L} = \frac{1}{24}\sum_h L_h$ are the peak and average loads, $L_h = \sum_a S_{a,h} \cdot P_a$ is the total load at hour $h$, $K$ is the grid capacity, $(\cdot)_+$ denotes $\max(0, \cdot)$, $\Phi_{\text{constraints}}(\mathbf{S})$ is the physical constraint penalty (Eq.~\eqref{eq:constraints}), and $\text{MAE}(L, \hat{L}_{\text{GRU}})$ is the mean absolute error between the optimized load profile $L$ and the GRU-forecasted load $\hat{L}_{\text{GRU}}$. The ON-count per appliance is preserved as a hard constraint through a repair operator.
 
 % ────────────────────────────────────────────────────────
 \subsubsection{Constraint Engine}
@@ -320,33 +366,12 @@ The constraint engine evaluates physical and operational feasibility of candidat
     \Phi_{\text{constraints}} = \underbrace{\max\left(0, E_{\text{total}} - E_{\max}\right)^2}_{\text{Daily energy cap}} + \underbrace{\sum_h \max\left(0, L_h - L_{\max}\right)^2}_{\text{Hourly power cap}}
     \label{eq:constraints}
 \end{equation}
-where $E_{\text{total}} = \sum_{a,h} S_{a,h} \cdot P_a \cdot \Delta t$ is the total daily energy, $E_{\max} = 80$ kWh is the daily cap, and $L_h = \sum_a S_{a,h} \cdot P_a$ is the total load at hour $h$ with cap $L_{\max} = 15$ kW. The feasible set defining all strict operational states forms a rugged discontinuous subspace:
+where $E_{\text{total}} = \sum_{a,h} S_{a,h} \cdot P_a \cdot \Delta t$ is the total daily energy consumption, $S_{a,h}$ is the ON/OFF state of appliance $a$ at slot $h$, $P_a$ is the rated power, $\Delta t = 0.25$\,h is the time slot duration, $E_{\max} = 80$\,kWh is the maximum allowable daily energy, $L_h = \sum_a S_{a,h} \cdot P_a$ is the instantaneous load at hour $h$, and $L_{\max} = 15$\,kW is the maximum allowable hourly power. The feasible set defining all strict operational states forms a rugged discontinuous subspace:
 \begin{equation}
     \Omega = \left\{ \mathbf{S} \in \{0,1\}^{A \times T} \ \middle| \ \Phi_{\text{constraints}}(\mathbf{S}) \leq \epsilon_{\text{tol}} \right\}
     \label{eq:feasible_space}
 \end{equation}
-
-% ────────────────────────────────────────────────────────
-\subsubsection{Interactive Dashboard}
-
-The system includes a real-time Plotly Dash web dashboard that allows users to:
-\begin{itemize}
-    \item Toggle individual appliance schedules for a 24-hour period
-    \item Adjust grid capacity limits and view real-time constraint feedback
-    \item Trigger DE optimization and visualize before/after cost comparisons
-    \item View hourly Stackelberg equilibrium prices alongside demand profiles
-    \item Monitor federated model performance metrics (MAE, RMSE, MAPE)
-\end{itemize}
-The dashboard communicates with the optimization backend through a callback-driven architecture, where user schedule changes trigger both Stackelberg price recomputation and DE re-optimization using forecasted load profiles from the GRU model. The unified optimization loop can be formally stated as finding the sub-game perfect equilibrium mixed with constrained scheduling:
-\begin{equation}
-    \min_{\mathbf{S}} \; f\big(\mathbf{S}, \arg\max_p \Pi(p, \mathbf{c}^*(\mathbf{S})), \hat{\mathbf{y}}_{\text{FedGRU}}\big)
-    \label{eq:unified_opt}
-\end{equation}
-subject to continuous dynamic feedback from the user interface rendering state matrix $\mathbf{V}_{t}$. The rendering state dynamically polls:
-\begin{equation}
-    \mathbf{V}_{t+1} = \psi_{\text{dash}}\left(\mathbf{V}_t, \nabla f, \mathbf{S}^* | \mathcal{T}_{refresh}\right)
-    \label{eq:dashboard_render}
-\end{equation}
+where $\Omega$ is the feasible solution space, $\mathbf{S}$ is a binary schedule matrix of $A = 7$ appliances over $T = 96$ time slots, $\Phi_{\text{constraints}}(\mathbf{S})$ is the constraint violation penalty, and $\epsilon_{\text{tol}}$ is a small numerical tolerance threshold for feasibility.
 
 % ############################################################
 %              SECTION 2: RESULTS AND DISCUSSION
@@ -377,7 +402,7 @@ Table~\ref{tab:hyperparams} summarizes the key hyperparameters used across all m
 \label{tab:hyperparams}
 \begin{tabular}{llr}
 \toprule
-\textbf{Module} & \textbf{Parameter} & \textbf{Value} \\
+\textit{Module} & \textit{Parameter} & \textit{Value} \\
 \midrule
 \multirow{4}{*}{VAE}
     & Input / Hidden / Latent dim & 19 / 64 / 16 \\
@@ -420,32 +445,15 @@ All experiments were conducted on a machine with an Intel Core i7 processor, NVI
 \subsection{Tools and Frameworks Used}
 % ────────────────────────────────────────────────────────
 
-\begin{itemize}
-    \item \textbf{Deep Learning:} PyTorch 2.0+ (VAE and GRU architectures, CUDA)
-    \item \textbf{Data Processing:} Pandas 2.0+, NumPy 1.24+, scikit-learn 1.3+
-    \item \textbf{Optimization:} Custom DE implementation, SciPy 1.10+
-    \item \textbf{Visualization:} Plotly 5.15+, Dash 2.14+, Matplotlib 3.7+
-    \item \textbf{Configuration:} PyYAML 6.0+
-    \item \textbf{Dashboard:} Plotly Dash with dash-bootstrap-components
-\end{itemize}
+The implementation leverages PyTorch 2.0+ with CUDA acceleration for deep learning (VAE and GRU architectures), Pandas 2.0+, NumPy 1.24+, and scikit-learn 1.3+ for data processing, a custom Differential Evolution implementation alongside SciPy 1.10+ for optimization, Plotly 5.15+, Dash 2.14+, and Matplotlib 3.7+ for visualization, PyYAML 6.0+ for configuration management, and Plotly Dash with dash-bootstrap-components for the interactive dashboard.
 
-% ────────────────────────────────────────────────────────
-\subsection{Comparative Performance Analysis}
-% ────────────────────────────────────────────────────────
-
-This subsection presents the comprehensive experimental evaluation of the proposed hybrid intelligent energy optimization framework. Performance is evaluated against three recent IEEE Transactions baselines:
-\begin{itemize}
-    \item \textbf{BDIA}: Big Data-Intelligence Analytics for Energy Optimization~\cite{bdia2025},
-    \item \textbf{MADRL}: Multi-Agent DRL-Based Demand Response~\cite{madrl2025},
-    \item \textbf{STFL}: Spatiotemporal Federated Learning for Privacy-Preserving Load Forecasting~\cite{stfl2025}.
-\end{itemize}
 
 % ================================================================
 % GRAPH 1
 % ================================================================
 \subsubsection{VAE Reconstruction Loss Convergence}
 
-\begin{figure}[!htbp]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig01_vae_recon_loss.pdf}
 \caption{Comparative VAE loss convergence across representation learning frameworks. The proposed $\beta$-VAE ($\beta=0.5$) achieves a final training loss of $0.0947$ and validation loss of $0.0886$, outperforming BDIA-VAE and standard autoencoder baselines.}
@@ -456,14 +464,14 @@ Fig.~\ref{fig:vae_recon} illustrates the loss convergence for four representatio
 \begin{equation}
     \frac{\partial \mathcal{L}_{\text{recon}}}{\partial \beta} + \gamma \frac{\partial D_{KL}}{\partial \beta} = 0
 \end{equation}
-where $\gamma$ represents the empirical Lagrange multiplier. The convergence follows an exponential decay model $\mathcal{L}(e) = A \cdot e^{-\lambda e} + \mathcal{L}_{\infty}$. The balanced KL regularization ($\beta = 0.5$) prevents posterior collapse while maintaining smooth latent manifold structure, effectively acting as an implicit regularizer that encourages the encoder to discover more informative latent representations. The PCA baseline, being a linear projection, achieves a constant higher loss, confirming the necessity of non-linear feature extraction for capturing the complex correlations present in IoT energy data---particularly the non-linear relationship between occupancy states, thermal dynamics, and appliance activation patterns.
+where $\mathcal{L}_{\text{recon}}$ is the reconstruction loss, $D_{KL}$ is the KL divergence, $\beta$ is the KL weight hyperparameter, and $\gamma$ represents the empirical Lagrange multiplier that balances the two objectives at the Pareto-optimal point. The convergence follows an exponential decay model $\mathcal{L}(e) = A \cdot e^{-\lambda e} + \mathcal{L}_{\infty}$, where $e$ is the epoch number, $A$ is the initial loss amplitude, $\lambda$ is the decay rate, and $\mathcal{L}_{\infty}$ is the asymptotic loss floor. The balanced KL regularization ($\beta = 0.5$) prevents posterior collapse while maintaining smooth latent manifold structure, effectively acting as an implicit regularizer that encourages the encoder to discover more informative latent representations. The PCA baseline, being a linear projection, achieves a constant higher loss, confirming the necessity of non-linear feature extraction for capturing the complex correlations present in IoT energy data---particularly the non-linear relationship between occupancy states, thermal dynamics, and appliance activation patterns.
 
 % ================================================================
 % GRAPH 2
 % ================================================================
 \subsubsection{Latent Space KL Divergence Analysis}
 
-\begin{figure}[!htbp]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig02_kl_divergence.pdf}
 \caption{KL divergence convergence during VAE training. The proposed $\beta$-VAE stabilizes at $D_{KL} \approx 0.0386$, achieving better latent space regularization than both BDIA-VAE and vanilla VAE variants.}
@@ -473,14 +481,15 @@ where $\gamma$ represents the empirical Lagrange multiplier. The convergence fol
 Fig.~\ref{fig:kl_div} presents the evolution of the Kullback-Leibler divergence $D_{KL}(q(z|x) \| p(z))$ during training. The proposed $\beta$-VAE converges to $D_{KL} \approx 0.0386$, significantly lower than the BDIA-VAE and vanilla VAE baselines due to the controlled $\beta = 0.5$ weighting. The theoretical limit of this divergence under optimal Gaussian parameterization is governed by the Fisher Information Matrix $\mathcal{I}(\phi)$:
 \begin{equation}
     D_{KL}(q_\phi(z|x) \| p(z)) \approx \frac{1}{2} (\phi - \phi^*)^T \mathcal{I}(\phi^*) (\phi - \phi^*)
-\end{equation} The KL term is computed as per Eq.~\eqref{eq:vae_loss}. The lower KL divergence indicates that the learned posterior more closely approximates the prior, resulting in a smoother, more regularized latent space. This is critical for downstream GRU forecasting: smoother latent trajectories produce more stable temporal sequences. The rapid convergence from an initial KL of $\sim$0.027 to the stable value of 0.0386 (by epoch 10) demonstrates effective information-theoretic equilibrium between compression and reconstruction.
+\end{equation}
+where $q_\phi(z|x)$ is the learned approximate posterior parameterized by $\phi$, $p(z)$ is the standard Gaussian prior, $\phi^*$ is the optimal encoder parameter, and $\mathcal{I}(\phi^*)$ is the Fisher Information Matrix evaluated at the optimum. The KL term is computed as per Eq.~\eqref{eq:vae_loss}. The lower KL divergence indicates that the learned posterior more closely approximates the prior, resulting in a smoother, more regularized latent space. This is critical for downstream GRU forecasting: smoother latent trajectories produce more stable temporal sequences. The rapid convergence from an initial KL of $\sim$0.027 to the stable value of 0.0386 (by epoch 10) demonstrates effective information-theoretic equilibrium between compression and reconstruction.
 
 % ================================================================
 % GRAPH 3
 % ================================================================
 \subsubsection{Federated GRU Load Forecasting Accuracy}
 
-\begin{figure}[!htbp]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig03_fedgru_mae.pdf}
 \caption{Federated GRU load forecasting MAE across communication rounds. The proposed FedGRU with VAE latent features achieves MAE = 1.846\,kW after 20 communication rounds while preserving user privacy.}
@@ -491,14 +500,14 @@ Fig.~\ref{fig:fedgru_mae} demonstrates the convergence of the Mean Absolute Erro
 \begin{equation}
     \mathbb{E} \left[ \|\nabla \mathcal{L}_k - \nabla \mathcal{L}_{\text{global}}\|^2 \right] \leq G^2 \cdot \varpi
 \end{equation}
-where $\varpi \in (0, 1]$ represents the representation similarity threshold computed across the latent space clusters, thus intrinsically accelerating federated convergence.
+where $\nabla \mathcal{L}_k$ is the gradient of client $k$'s local loss, $\nabla \mathcal{L}_{\text{global}}$ is the gradient of the global loss, $G^2$ is the global gradient magnitude bound, and $\varpi \in (0, 1]$ represents the representation similarity threshold computed across the latent space clusters, thus intrinsically accelerating federated convergence.
 
 % ================================================================
 % GRAPH 4
 % ================================================================
 \subsubsection{Federated Learning RMSE Convergence}
 
-\begin{figure}[!htbp]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig04_fl_rmse.pdf}
 \caption{RMSE convergence comparison across federated learning strategies. FedAvg-GRU achieves RMSE = 2.502\,kW, outperforming FedSGD and STFL baselines.}
@@ -512,21 +521,21 @@ Fig.~\ref{fig:fl_rmse} compares the Root Mean Square Error convergence of four f
 % ================================================================
 \subsubsection{Privacy-Accuracy Trade-off Under Client Variation}
 
-\begin{figure}[!htbp]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig05_privacy_accuracy.pdf}
 \caption{Privacy-accuracy trade-off analysis under varying client participation fractions. The proposed framework achieves MAPE = 60.97\% at 40\% participation, with performance improving as more clients participate.}
 \label{fig:privacy_tradeoff}
 \end{figure}
 
-Fig.~\ref{fig:privacy_tradeoff} analyzes the Mean Absolute Percentage Error as a function of client participation fraction $\rho \in [0.1, 1.0]$. The proposed FedGRU achieves MAPE $= 60.97\%$ at the default $\rho = 0.4$ (20 out of 50 homes). The relatively high MAPE is attributed to near-zero consumption periods in ground truth data that inflate the percentage metric, while absolute error (MAE $= 1.846$\,kW) remains practical. The MAPE improvement follows a diminishing returns curve $\text{MAPE}(\rho) = \text{MAPE}_{\infty} + \alpha \cdot e^{-\gamma \rho}$, where $\alpha$ captures the initial error reduction rate and $\gamma$ governs the saturation behavior. For $N = 50$ homes with 30 days of data, each local model sees only $\sim$2,880 records, while federated aggregation enables implicit access to $\sim$144,000 records through weight sharing. The shaded confidence bands show that the proposed framework exhibits lower variance across random client selections, attributable to the VAE's noise-invariant latent representation.
+Fig.~\ref{fig:privacy_tradeoff} analyzes the Mean Absolute Percentage Error as a function of client participation fraction $\rho \in [0.1, 1.0]$. The proposed FedGRU achieves MAPE $= 60.97\%$ at the default $\rho = 0.4$ (20 out of 50 homes). The relatively high MAPE is attributed to near-zero consumption periods in ground truth data that inflate the percentage metric, while absolute error (MAE $= 1.846$\,kW) remains practical. The MAPE improvement follows a diminishing returns curve $\text{MAPE}(\rho) = \text{MAPE}_{\infty} + \alpha \cdot e^{-\gamma \rho}$, where $\rho$ is the client participation fraction, $\text{MAPE}_{\infty}$ is the asymptotic error at full participation, $\alpha$ captures the initial error reduction rate, and $\gamma$ governs the saturation behavior. For $N = 50$ homes with 30 days of data, each local model sees only $\sim$2,880 records, while federated aggregation enables implicit access to $\sim$144,000 records through weight sharing. The shaded confidence bands show that the proposed framework exhibits lower variance across random client selections, attributable to the VAE's noise-invariant latent representation.
 
 % ================================================================
 % GRAPH 6
 % ================================================================
 \subsubsection{Stackelberg Equilibrium Price Convergence}
 
-\begin{figure}[!htbp]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig06_stackelberg_price.pdf}
 \caption{Comparative Stackelberg equilibrium price convergence across pricing mechanisms. The proposed approach converges to $p^* = 4.24$\,INR/kWh, reflecting the equilibrium point where leader profit is maximized given follower demand responses.}
@@ -540,21 +549,21 @@ Fig.~\ref{fig:sg_convergence} compares the convergence behavior of four pricing 
 % ================================================================
 \subsubsection{Hourly Stackelberg Pricing vs.\ Demand Response}
 
-\begin{figure}[!htbp]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig07_hourly_price_demand.pdf}
 \caption{Hourly Stackelberg equilibrium pricing and corresponding demand response. Dynamic SG pricing produces an inverse price-demand relationship alongside the DE-optimized schedule.}
 \label{fig:hourly_price}
 \end{figure}
 
-Fig.~\ref{fig:hourly_price} presents the dual-axis visualization of hourly Stackelberg equilibrium prices alongside the resulting demand profiles. The proposed framework produces dynamic prices that respond to hourly demand variations through independent per-hour equilibrium computation (Eq.~\eqref{eq:hourly_sg}). The blended pricing formula $p_h^{\text{blend}} = 0.5 \times p_h^{\text{TOU}} + 0.5 \times p_h^{\text{SG}}$ smooths the equilibrium signal with the TOU baseline, preventing excessive volatility. The area between the original and optimized demand curves quantifies the total load shifted, representing a fundamental transformation from a peak-concentrated to a valley-filled load profile driven by the combined effect of game-theoretic pricing and evolutionary optimization.
+Fig.~\ref{fig:hourly_price} presents the dual-axis visualization of hourly Stackelberg equilibrium prices alongside the resulting demand profiles. The proposed framework produces dynamic prices that respond to hourly demand variations through independent per-hour equilibrium computation (Eq.~\eqref{eq:hourly_sg}). The blended pricing formula $p_h^{\text{blend}} = 0.5 \times p_h^{\text{TOU}} + 0.5 \times p_h^{\text{SG}}$ smooths the equilibrium signal with the TOU baseline, where $p_h^{\text{blend}}$ is the blended price at hour $h$, $p_h^{\text{TOU}}$ is the static TOU price, and $p_h^{\text{SG}}$ is the Stackelberg equilibrium price, preventing excessive volatility. The area between the original and optimized demand curves quantifies the total load shifted, representing a fundamental transformation from a peak-concentrated to a valley-filled load profile driven by the combined effect of game-theoretic pricing and evolutionary optimization.
 
 % ================================================================
 % GRAPH 8
 % ================================================================
 \subsubsection{Differential Evolution Fitness Convergence}
 
-\begin{figure}[!htbp]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig08_de_fitness.pdf}
 \caption{DE fitness function convergence compared with metaheuristic and DRL baselines. The proposed DE/rand/1/bin converges within 500 generations using the real 8-term composite fitness function.}
@@ -568,79 +577,90 @@ Fig.~\ref{fig:de_fitness} compares the fitness convergence of the proposed DE/ra
 % ================================================================
 \subsubsection{Comparative Daily Energy Cost Reduction}
 
-\begin{figure}[!htbp]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig09_cost_reduction.pdf}
 \caption{Comparative daily energy cost reduction across optimization frameworks. The proposed framework achieves 46.2\% cost reduction (1308\,INR $\to$ 704\,INR), outperforming all baselines.}
 \label{fig:cost_reduction}
 \end{figure}
 
-Fig.~\ref{fig:cost_reduction} presents the daily energy cost reduction percentages across five methods. The proposed framework achieves $46.2\%$ cost reduction (1308\,INR $\to$ 704\,INR) compared to the unoptimized baseline. The cost reduction is computed as $\Delta C = (C_{\text{orig}} - C_{\text{opt}}) / C_{\text{orig}} \times 100\%$, where $C = \sum_{a,h} S_{a,h} \cdot P_a \cdot p_h \cdot \Delta t$. The proposed framework's advantage is threefold: (1) the Stackelberg pricing provides optimal price signals that the DE directly optimizes against, creating a tighter feedback loop than static prices used by BDIA and STFL; (2) the 8-term fitness function captures multi-dimensional trade-offs that simple cost-only objectives miss; and (3) the VAE-GRU forecast alignment penalty nudges schedules toward predicted demand patterns, establishing a stable fixed point theorem bounded by:
+Fig.~\ref{fig:cost_reduction} presents the daily energy cost reduction percentages across five methods. The proposed framework achieves $46.2\%$ cost reduction (1308\,INR $\to$ 704\,INR) compared to the unoptimized baseline. The cost reduction is computed as $\Delta C = (C_{\text{orig}} - C_{\text{opt}}) / C_{\text{orig}} \times 100\%$, where $\Delta C$ is the percentage cost reduction, $C_{\text{orig}}$ is the original daily cost, $C_{\text{opt}}$ is the optimized cost, and $C = \sum_{a,h} S_{a,h} \cdot P_a \cdot p_h \cdot \Delta t$ with $S_{a,h}$ being the ON/OFF state, $P_a$ the rated power, $p_h$ the price at hour $h$, and $\Delta t$ the time slot duration. The proposed framework's advantage is threefold: (1) the Stackelberg pricing provides optimal price signals that the DE directly optimizes against, creating a tighter feedback loop than static prices used by BDIA and STFL; (2) the 8-term fitness function captures multi-dimensional trade-offs that simple cost-only objectives miss; and (3) the VAE-GRU forecast alignment penalty nudges schedules toward predicted demand patterns, establishing a stable fixed point theorem bounded by:
 \begin{equation}
     \left| \Delta C \right| \geq \delta_{\text{min}} \int_{0}^{T} (p_h^{\text{SG}} - p_h^{\text{TOU}}) \cdot \dot{c}_{shift}(t) dt
 \end{equation}
-reflecting the continuous-time analogue of discrete evolutionary savings leaps.
+where $\Delta C$ is the cost savings, $\delta_{\text{min}}$ is the minimum savings coefficient, $T$ is the total scheduling horizon, $p_h^{\text{SG}}$ and $p_h^{\text{TOU}}$ are the Stackelberg and TOU prices at hour $h$, and $\dot{c}_{shift}(t)$ is the rate of load shifting at time $t$. This reflects the continuous-time analogue of discrete evolutionary savings leaps.
 
 % ================================================================
 % GRAPH 10
 % ================================================================
 \subsubsection{Peak Load Reduction: Peak-to-Average Ratio}
 
-\begin{figure}[!htbp]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig10_par_comparison.pdf}
 \caption{Peak-to-Average Ratio (PAR) comparison across methods. The proposed framework achieves significant peak reduction from the unoptimized baseline.}
 \label{fig:par}
 \end{figure}
 
-Fig.~\ref{fig:par} presents the Peak-to-Average Ratio (PAR) across six configurations. The proposed DE-based optimizer achieves $23.0\%$ peak load reduction. The PAR metric is defined as $\text{PAR} = L_{\max} / \bar{L}$ where $L_{\max} = \max_h \sum_a S_{a,h} \cdot P_a$ and $\bar{L} = \frac{1}{24}\sum_h \sum_a S_{a,h} \cdot P_a$. A PAR approaching 1.0 indicates perfectly uniform load distribution. The improvement is driven by the DE fitness function's peak penalty $\Phi_{\text{peak}} = \max(0, \frac{L_{\max}}{\bar{L}} - 1.5) \times 30$ and grid capacity penalty $\Phi_{\text{grid}} = \sum_h \max(0, L_h - K)^2 \times 50$.
+Fig.~\ref{fig:par} presents the Peak-to-Average Ratio (PAR) across six configurations. The proposed DE-based optimizer achieves $23.0\%$ peak load reduction. The PAR metric is defined as $\text{PAR} = L_{\max} / \bar{L}$, where $L_{\max} = \max_h \sum_a S_{a,h} \cdot P_a$ is the maximum hourly load across all time slots, $\bar{L} = \frac{1}{24}\sum_h \sum_a S_{a,h} \cdot P_a$ is the average hourly load, $S_{a,h}$ is the ON/OFF state of appliance $a$ at hour $h$, and $P_a$ is the rated power of appliance $a$. A PAR approaching 1.0 indicates perfectly uniform load distribution. The improvement is driven by the DE fitness function's peak penalty $\Phi_{\text{peak}} = \max(0, \frac{L_{\max}}{\bar{L}} - 1.5) \times 30$ and grid capacity penalty $\Phi_{\text{grid}} = \sum_h \max(0, L_h - K)^2 \times 50$, where $L_h$ is the load at hour $h$ and $K$ is the grid capacity.
 
 % ================================================================
 % GRAPH 11
 % ================================================================
 \subsubsection{Hourly Load Distribution Before and After Optimization}
 
-\begin{figure}[!htbp]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig11_load_distribution.pdf}
 \caption{Hourly load distribution comparison before and after optimization. The proposed framework achieves effective peak shaving and valley filling, producing the flattest load curve among all methods.}
 \label{fig:load_dist}
 \end{figure}
 
-Fig.~\ref{fig:load_dist} visualizes the hourly load profiles before and after optimization. The proposed framework demonstrates significant peak shaving during expensive hours as the DE's cost term $\sum S_{a,h} P_a p_h$ becomes prohibitively expensive for deferrable loads, while valley filling occurs as the optimizer shifts EV charging (7.0\,kW) and water heating (4.5\,kW) to exploit low off-peak prices. The load standard deviation across hours $\sigma_L = \sqrt{\frac{1}{24}\sum_h (L_h - \bar{L})^2}$ is substantially lower for the proposed framework compared to all baselines, confirming superior load balancing.
+Fig.~\ref{fig:load_dist} visualizes the hourly load profiles before and after optimization. The proposed framework demonstrates significant peak shaving during expensive hours as the DE's cost term $\sum S_{a,h} P_a p_h$ becomes prohibitively expensive for deferrable loads, where $S_{a,h}$ is the ON/OFF state, $P_a$ is the rated power, and $p_h$ is the price at hour $h$. Valley filling occurs as the optimizer shifts EV charging (7.0\,kW) and water heating (4.5\,kW) to exploit low off-peak prices. The load standard deviation across hours $\sigma_L = \sqrt{\frac{1}{24}\sum_h (L_h - \bar{L})^2}$, where $L_h$ is the load at hour $h$ and $\bar{L}$ is the mean hourly load, is substantially lower for the proposed framework compared to all baselines, confirming superior load balancing.
 
 % ================================================================
 % GRAPH 12
 % ================================================================
 \subsubsection{Multi-Objective Performance Comparison}
 
-\begin{figure}[!htbp]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig12_radar_comparison.pdf}
 \caption{Multi-objective radar comparison across six performance dimensions. The proposed framework achieves the largest coverage area, demonstrating balanced superiority across all evaluation criteria.}
 \label{fig:radar}
 \end{figure}
 
-Fig.~\ref{fig:radar} presents a radar chart comparing the four frameworks across six normalized performance dimensions. The aggregate multi-objective score is computed as $\mathcal{S} = \frac{1}{M}\sum_{m=1}^{M} s_m$ where $s_m \in [0,1]$. The radar area, computed as $A = \frac{1}{2}\sum_{m=1}^{M} s_m \cdot s_{m+1} \cdot \sin(\frac{2\pi}{M})$, provides a geometric measure of overall performance. The BDIA approach scores poorly on Privacy due to its centralized learning. MADRL achieves strong Comfort through reward shaping but sacrifices Convergence Speed. STFL achieves good Privacy through federated design but lacks game-theoretic pricing and evolutionary optimization. The proposed framework's balanced superiority validates the complementary integration of all four algorithmic pillars: VAE (representation), FedGRU (privacy-preserving forecasting), Stackelberg (optimal pricing), and DE (constrained schedule optimization).
+Fig.~\ref{fig:radar} presents a radar chart comparing the four frameworks across six normalized performance dimensions. The aggregate multi-objective score is computed as $\mathcal{S} = \frac{1}{M}\sum_{m=1}^{M} s_m$, where $\mathcal{S}$ is the overall score, $M = 6$ is the number of performance dimensions, and $s_m \in [0,1]$ is the normalized score on the $m$-th dimension. The radar area, computed as $A = \frac{1}{2}\sum_{m=1}^{M} s_m \cdot s_{m+1} \cdot \sin(\frac{2\pi}{M})$, where $A$ is the polygon area and $s_{M+1} = s_1$ wraps cyclically, provides a geometric measure of overall performance. The BDIA approach scores poorly on Privacy due to its centralized learning. MADRL achieves strong Comfort through reward shaping but sacrifices Convergence Speed. STFL achieves good Privacy through federated design but lacks game-theoretic pricing and evolutionary optimization. The proposed framework's balanced superiority validates the complementary integration of all four algorithmic pillars: VAE (representation), FedGRU (privacy-preserving forecasting), Stackelberg (optimal pricing), and DE (constrained schedule optimization).
 
 % ────────────────────────────────────────────────────────
-\subsection{Implementation Scope and Status}
+\subsection{Comparative Performance Analysis}
 % ────────────────────────────────────────────────────────
 
-The proposed privacy-preserving energy optimization framework has been strictly implemented observing the 50\% to 75\% implementation scope constraint dictated by the project development lifecycle. Specifically, the simulation environment, data preprocessing pipeline, $\beta$-VAE feature extractor, FedGRU load forecasting model, and fundamental Stackelberg game pricing simulator have been fully realized ($\approx$ 65\% implementation). The remaining 35\% pertains to full-scale hardware deployment, physical IoT sensor integration, edge-node real-time federated deployment, and large-scale real-user validation, which are mapped for the final phase. By focusing the current iteration on algorithmic validation, theoretical bounds verification, and robust software-in-the-loop simulation, we guarantee the mathematical efficacy of both the predictive and optimization layers before proceeding to hardware coupling.
+The proposed hybrid intelligent energy optimization framework is evaluated against three recent IEEE Transactions baselines: BDIA (Big Data-Intelligence Analytics for Energy Optimization~\cite{bdia2025}), MADRL (Multi-Agent DRL-Based Demand Response~\cite{madrl2025}), and STFL (Spatiotemporal Federated Learning for Privacy-Preserving Load Forecasting~\cite{stfl2025}).
+
+% ============================================================
+% CONCLUSION
+% ============================================================
+\section{Conclusion}
+
+This paper presented a privacy-preserving hybrid intelligent framework for smart home energy optimization that integrates six complementary modules: a Digital Twin Simulator for realistic data generation, a $\beta$-VAE for nonlinear dimensionality reduction, a Federated GRU network for privacy-preserving load forecasting, a Hierarchical Stackelberg Game for dynamic pricing, a Differential Evolution optimizer for constrained multi-objective schedule optimization, and an interactive visualization dashboard.
+
+Experimental evaluation on a synthetic dataset of 50 smart homes over 30 days demonstrated that the proposed framework achieves 46.2\% daily energy cost reduction (1308\,INR $\to$ 704\,INR), 23.0\% peak load reduction, and robust forecasting accuracy (MAE = 1.846\,kW, RMSE = 2.502\,kW) while preserving complete data privacy through federated learning. Comparative analysis against three recent IEEE baselines---BDIA, MADRL, and STFL---confirmed balanced superiority across all six evaluation dimensions: cost savings, comfort preservation, privacy, convergence speed, peak reduction, and forecast accuracy.
+
+The key contribution lies in the end-to-end integration of these algorithmic pillars into a unified pipeline, where VAE-compressed latent representations enable efficient federated training, Stackelberg equilibrium prices provide economically rational cost signals, and the DE optimizer produces schedules that simultaneously minimize cost, preserve comfort, and respect physical constraints. Future work will focus on full-scale hardware deployment, physical IoT sensor integration, edge-node real-time federated deployment, and large-scale real-user validation.
 
 % ============================================================
 % REFERENCES
 % ============================================================
 \begin{thebibliography}{3}
 \bibitem{bdia2025}
-Big Data-Intelligence Analytics for Energy Optimization in IoT-Enabled Smart Home Devices, \textit{IEEE Transactions}, 2025. [Online]. Available: \url{https://ieeexplore.ieee.org/document/10980008}
+``Big data-intelligence analytics for energy optimization in IoT-enabled smart home devices,'' \textit{IEEE Trans.}, 2025. [Online]. Available: \url{https://ieeexplore.ieee.org/document/10980008}
 
 \bibitem{madrl2025}
-Multiagent DRL-Based Demand Response Optimization for IoT-Based Smart Home Energy Management Systems, \textit{IEEE Transactions}, 2025. [Online]. Available: \url{https://ieeexplore.ieee.org/document/10967490}
+``Multiagent DRL-based demand response optimization for IoT-based smart home energy management systems,'' \textit{IEEE Trans.}, 2025. [Online]. Available: \url{https://ieeexplore.ieee.org/document/10967490}
 
 \bibitem{stfl2025}
-Spatiotemporal Federated Learning for Privacy-Preserving Load Forecasting and Appliance Scheduling in Smart City Homes, \textit{IEEE Transactions}, 2025. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11189875}
+``Spatiotemporal federated learning for privacy-preserving load forecasting and appliance scheduling in smart city homes,'' \textit{IEEE Trans.}, 2025. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11189875}
 \end{thebibliography}
 
 \end{document}
