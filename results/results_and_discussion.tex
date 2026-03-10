@@ -99,10 +99,10 @@ where $X_t$ is the occupancy random variable at time step $t$, $s_i$ and $s_j$ a
 
 \subsubsection{Thermal Environment Model} The outdoor temperature follows a sinusoidal daily cycle with stochastic perturbation:
 \begin{equation}
-    T_{\text{out}}(t) = T_{\text{base}} + A_T \cos\left(\frac{2\pi(h-14)}{24}\right) + \epsilon_T
+    T_{\text{out}}(t) = T_{\text{base}} + A_T \cos\left(\frac{2\pi(h-h_{\text{peak}})}{24}\right) + \epsilon_T
     \label{eq:outdoor_temp}
 \end{equation}
-where $T_{\text{base}} = 30^\circ$C is the Indian climate baseline, $A_T = 8^\circ$C is the daily amplitude, $h$ is the hour, and $\epsilon_T \sim \mathcal{N}(0, 1)$.
+where $T_{\text{base}}$ represents the baseline regional temperature, $A_T$ is the daily temperature fluctuation amplitude, $h$ is the current hour of the day, $h_{\text{peak}}$ is the hour corresponding to the maximum daily temperature, and $\epsilon_T \sim \mathcal{N}(0, 1)$ introduces stochastic climatic perturbations.
 
 Indoor temperature evolves via thermal dynamics with HVAC coupling:
 \begin{equation}
@@ -171,14 +171,14 @@ The $\beta$-VAE performs nonlinear dimensionality reduction from $d = 19$ raw fe
     \boldsymbol{\mu} = \mathbf{W}_\mu \mathbf{h} + \mathbf{b}_\mu, \quad \log \boldsymbol{\sigma}^2 = \mathbf{W}_\sigma \mathbf{h} + \mathbf{b}_\sigma
     \label{eq:encoder_params}
 \end{equation}
-where $\mathbf{h}$ is the hidden representation, $\mathbf{W}_1$ and $\mathbf{b}_1$ are the weight matrix and bias of the first fully connected layer, $\text{BN}(\cdot)$ denotes batch normalization, $\text{ReLU}(\cdot) = \max(0, \cdot)$ is the rectified linear activation, $\boldsymbol{\mu}$ and $\log \boldsymbol{\sigma}^2$ are the mean and log-variance vectors of the latent Gaussian posterior, and $\mathbf{W}_\mu$, $\mathbf{b}_\mu$, $\mathbf{W}_\sigma$, $\mathbf{b}_\sigma$ are their respective projection weights and biases. The architecture uses two hidden layers with dimensions $64 \to 32 \to 16$.
+where $\mathbf{h}$ is the hidden representation, $\mathbf{W}_1$ and $\mathbf{b}_1$ are the weight matrix and bias of the first fully connected layer, $\text{BN}(\cdot)$ denotes batch normalization, and $\text{ReLU}(\cdot) = \max(0, \cdot)$ is the rectified linear activation. Here, $\boldsymbol{\mu}$ represents the predicted mean (the central, deterministic baseline of the compressed representation), $\boldsymbol{\sigma}^2$ represents the predicted variance (the uncertainty or spread capturing the natural variability in energy patterns), and $\mathbf{W}_\mu$, $\mathbf{b}_\mu$, $\mathbf{W}_\sigma$, $\mathbf{b}_\sigma$ are their respective projection weights and biases. The architecture uses two hidden layers with dimensions $64 \to 32 \to 16$.
 
 \subsubsection{Reparameterization Trick} To enable gradient-based optimization through the stochastic sampling, we use:
 \begin{equation}
     \mathbf{z} = \boldsymbol{\mu} + \boldsymbol{\sigma} \odot \boldsymbol{\epsilon}, \quad \boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})
     \label{eq:reparam}
 \end{equation}
-where $\mathbf{z} \in \mathbb{R}^{d_z}$ is the sampled latent vector, $\boldsymbol{\mu}$ and $\boldsymbol{\sigma}$ are the encoder-predicted mean and standard deviation, $\boldsymbol{\epsilon}$ is a noise vector sampled from the standard normal distribution $\mathcal{N}(\mathbf{0}, \mathbf{I})$, and $\odot$ denotes element-wise (Hadamard) multiplication.
+where $\mathbf{z} \in \mathbb{R}^{d_z}$ is the final sampled latent vector that acts as the compressed, lower-dimensional "fingerprint" of the original energy data, $\boldsymbol{\mu}$ and $\boldsymbol{\sigma}$ are the encoder-predicted mean and standard deviation that define the bounds of the sampling distribution, $\boldsymbol{\epsilon}$ is a random noise vector sampled from the standard normal distribution $\mathcal{N}(\mathbf{0}, \mathbf{I})$, and $\odot$ denotes element-wise (Hadamard) multiplication.
 
 \subsubsection{Decoder Network} The decoder $p_\theta(x|z)$ reconstructs the input from the latent code: $\hat{\mathbf{x}} = \sigma(\mathbf{W}_3(\text{ReLU}(\mathbf{W}_2 \mathbf{z} + \mathbf{b}_2)) + \mathbf{b}_3)$, where $\sigma(\cdot)$ is the sigmoid activation.
 
