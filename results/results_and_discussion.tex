@@ -109,14 +109,14 @@ Indoor temperature evolves via thermal dynamics with HVAC coupling:
     T_{\text{in}}(t+1) = T_{\text{in}}(t) + \alpha(T_{\text{out}}(t) - T_{\text{in}}(t)) - \eta \cdot u_{\text{HVAC}}(t)
     \label{eq:indoor_temp}
 \end{equation}
-where $\alpha = 0.05$ is the thermal decay rate, $\eta = 2.0 \cdot \Delta t$ is the HVAC cooling rate per slot, and $u_{\text{HVAC}}(t) \in \{-1, 0, +1\}$ indicates cooling, idle, or heating mode based on comfort bounds $[T_{\min}, T_{\max}] = [22, 26]^\circ$C.
+where $\alpha$ is the thermal decay rate, $\eta$ is the HVAC cooling rate per slot, and $u_{\text{HVAC}}(t) \in \{-1, 0, +1\}$ indicates cooling, idle, or heating mode based on user-defined comfort bounds $[T_{\min}, T_{\max}]$.
 
 \subsubsection{Appliance Activation Model} Each appliance $a$ has a time-varying activation probability modulated by occupancy and environmental conditions:
 \begin{equation}
     P_a(t) = \min\left(p_a^{\text{base}}(h) \cdot \gamma_{\text{occ}}(X_t) \cdot \gamma_{\text{env}}(T_{\text{in}}) \cdot \xi_{\text{home}}, \; 1.0\right)
     \label{eq:activation}
 \end{equation}
-where $p_a^{\text{base}}(h)$ is the base hourly schedule, $\gamma_{\text{occ}} \in \{0.05, 0.2, 1.0\}$ for Away/Sleeping/Home states, $\gamma_{\text{env}}$ is the temperature-responsive factor for HVAC, and $\xi_{\text{home}} \sim \mathcal{U}(0.7, 1.3)$ introduces per-home behavioral variation.
+where $p_a^{\text{base}}(h)$ is the base hourly schedule, $\gamma_{\text{occ}}$ are state-dependent modulation factors for Away/Sleeping/Home states, $\gamma_{\text{env}}$ is the temperature-responsive factor for HVAC, and $\xi_{\text{home}}$ introduces per-home behavioral variation sampled from a uniform distribution.
 
 \subsubsection{Time-of-Use Pricing} The electricity pricing follows a three-tier TOU structure:
 \begin{equation}
@@ -182,14 +182,14 @@ where $\mathbf{z} \in \mathbb{R}^{d_z}$ is the final sampled latent vector that 
 
 \subsubsection{Decoder Network} The decoder $p_\theta(x|z)$ reconstructs the input from the latent code: $\hat{\mathbf{x}} = \sigma(\mathbf{W}_3(\text{ReLU}(\mathbf{W}_2 \mathbf{z} + \mathbf{b}_2)) + \mathbf{b}_3)$, where $\sigma(\cdot)$ is the sigmoid activation.
 
-\subsubsection{$\beta$-VAE Loss Function} The training objective maximizes the Evidence Lower Bound (ELBO) with a controlled KL weight $\beta = 0.5$:
+\subsubsection{$\beta$-VAE Loss Function} The training objective maximizes the Evidence Lower Bound (ELBO) with a controlled KL weight $\beta$:
 \begin{equation}
     \mathcal{L}_{\beta\text{-VAE}} = \underbrace{\frac{1}{d}\sum_{i=1}^{d}(x_i - \hat{x}_i)^2}_{\mathcal{L}_{\text{recon}}} + \beta \cdot \underbrace{\left(-\frac{1}{2}\sum_{j=1}^{d_z}\left(1 + \log\sigma_j^2 - \mu_j^2 - \sigma_j^2\right)\right)}_{D_{KL}(q_\phi(z|x) \| p(z))}
     \label{eq:vae_loss}
 \end{equation}
-where $\mathcal{L}_{\beta\text{-VAE}}$ is the total loss, $d = 19$ is the input feature dimension, $x_i$ and $\hat{x}_i$ are the $i$-th original and reconstructed feature values, $\mathcal{L}_{\text{recon}}$ is the mean squared reconstruction error, $\beta = 0.5$ is the KL divergence weight, $d_z = 16$ is the latent dimension, $\mu_j$ and $\sigma_j^2$ are the mean and variance of the $j$-th latent dimension output by the encoder, $q_\phi(z|x)$ is the learned approximate posterior, and $p(z) = \mathcal{N}(\mathbf{0}, \mathbf{I})$ is the standard Gaussian prior.
+where $\mathcal{L}_{\beta\text{-VAE}}$ is the total loss, $d = 19$ is the input feature dimension, $x_i$ and $\hat{x}_i$ are the $i$-th original and reconstructed feature values, $\mathcal{L}_{\text{recon}}$ is the mean squared reconstruction error, $\beta$ is the KL divergence weight, $d_z$ is the latent dimension, $\mu_j$ and $\sigma_j^2$ are the mean and variance of the $j$-th latent dimension output by the encoder, $q_\phi(z|x)$ is the learned approximate posterior, and $p(z) = \mathcal{N}(\mathbf{0}, \mathbf{I})$ is the standard Gaussian prior.
 
-The $\beta = 0.5$ weighting provides a controlled trade-off: values below $1.0$ allow higher reconstruction fidelity at the cost of less regularized latent spaces, while preventing the ``KL vanishing'' problem ($\beta \to 0$).
+The optimized $\beta$ weighting provides a controlled trade-off: values below $1.0$ allow higher reconstruction fidelity at the cost of less regularized latent spaces, while preventing the ``KL vanishing'' problem ($\beta \to 0$).
 
 % ────────────────────────────────────────────────────────
 \subsection{Federated GRU Load Forecasting}
@@ -213,32 +213,32 @@ The FedGRU module trains a load forecasting model across $K = 50$ distributed cl
     \mathbf{h}_t = (1 - \mathbf{u}_t) \odot \mathbf{h}_{t-1} + \mathbf{u}_t \odot \tilde{\mathbf{h}}_t
     \label{eq:gru_output}
 \end{equation}
-where $\mathbf{r}_t$ is the reset gate, $\mathbf{u}_t$ is the update gate, $\tilde{\mathbf{h}}_t$ is the candidate hidden state, and $[\cdot, \cdot]$ denotes concatenation. The input $\mathbf{x}_t \in \mathbb{R}^{16}$ is the VAE latent vector at time $t$, and $\mathbf{h}_t \in \mathbb{R}^{64}$ is the hidden state. Two stacked GRU layers process sequences of length $L = 16$ (4 hours at 15-minute resolution).
+where $\mathbf{r}_t$ is the reset gate, $\mathbf{u}_t$ is the update gate, $\tilde{\mathbf{h}}_t$ is the candidate hidden state, and $[\cdot, \cdot]$ denotes concatenation. The input $\mathbf{x}_t \in \mathbb{R}^{d_z}$ is the VAE latent vector at time $t$, and $\mathbf{h}_t$ is the hidden state. Two stacked GRU layers process sequences of length $L$.
 
 \subsubsection{Prediction Head} The final hidden state is passed through a two-layer feedforward network:
 \begin{equation}
     \hat{y}_{t+1} = \mathbf{W}_o \cdot \text{ReLU}(\mathbf{W}_p \cdot \mathbf{h}_L + \mathbf{b}_p) + \mathbf{b}_o
     \label{eq:prediction}
 \end{equation}
-where $\hat{y}_{t+1}$ is the predicted total power consumption at the next time step, $\mathbf{h}_L \in \mathbb{R}^{64}$ is the GRU hidden state at the final sequence position $L$, $\mathbf{W}_p$ and $\mathbf{b}_p$ are the weight and bias of the intermediate projection layer, $\text{ReLU}(\cdot) = \max(0, \cdot)$ is the rectified linear activation, and $\mathbf{W}_o$ and $\mathbf{b}_o$ are the weight and bias of the output layer. To ensure the model avoids exploding gradients over the long $L=16$ sequences, spectral unrolling of the temporal dynamics bounds the Lipschitz constant of the hidden state transition:
+where $\hat{y}_{t+1}$ is the predicted total power consumption at the next time step, $\mathbf{h}_L$ is the GRU hidden state at the final sequence position $L$, $\mathbf{W}_p$ and $\mathbf{b}_p$ are the weight and bias of the intermediate projection layer, $\text{ReLU}(\cdot) = \max(0, \cdot)$ is the rectified linear activation, and $\mathbf{W}_o$ and $\mathbf{b}_o$ are the weight and bias of the output layer. To ensure the model avoids exploding gradients over the long sequences, spectral unrolling of the temporal dynamics bounds the Lipschitz constant of the hidden state transition:
 \begin{equation}
     \|\nabla_{\mathbf{h}_{t-1}} \mathbf{h}_t\|_2 \leq \sup_{\mathbf{x}} \left\| \text{diag}(\mathbf{u}_t \odot \tilde{\mathbf{h}}'_t) \mathbf{W}_h \right\|_2 < 1.0
     \label{eq:gru_lipschitz}
 \end{equation}
 where $\|\cdot\|_2$ is the spectral (operator) norm, $\nabla_{\mathbf{h}_{t-1}} \mathbf{h}_t$ is the Jacobian of the hidden state with respect to the previous hidden state, $\text{diag}(\cdot)$ constructs a diagonal matrix, $\mathbf{u}_t$ is the update gate vector, $\tilde{\mathbf{h}}'_t$ is the derivative of the candidate hidden state activation, and $\mathbf{W}_h$ is the candidate hidden state weight matrix. This establishes the theoretical stability of the temporal feature maps.
 
-\subsubsection{Federated Averaging (FedAvg)} In each communication round $r$, a random subset $S_r$ of $\lceil 0.4K \rceil = 20$ clients is selected. Each client $k \in S_r$ trains a local copy of the global model for $E = 5$ local epochs using its private data:
+\subsubsection{Federated Averaging (FedAvg)} In each communication round $r$, a random subset $S_r$ of $\lceil \rho K \rceil$ clients is selected. Each client $k \in S_r$ trains a local copy of the global model for $E$ local epochs using its private data:
 \begin{equation}
     \mathbf{w}_k^{(r+1)} = \mathbf{w}_k^{(r)} - \eta \nabla_{\mathbf{w}} \mathcal{L}_k(\mathbf{w}_k^{(r)})
     \label{eq:local_sgd}
 \end{equation}
-where $\mathbf{w}_k^{(r)}$ is the model weight vector for client $k$ at round $r$, $\eta = 0.001$ is the learning rate, $\nabla_{\mathbf{w}} \mathcal{L}_k$ is the gradient of the local loss with respect to the weights, and $\mathcal{L}_k = \frac{1}{n_k}\sum_{i=1}^{n_k}(\hat{y}_i - y_i)^2$ is the local MSE loss computed over $n_k$ samples. After local training, the server aggregates using weighted averaging:
+where $\mathbf{w}_k^{(r)}$ is the model weight vector for client $k$ at round $r$, $\eta$ is the learning rate, $\nabla_{\mathbf{w}} \mathcal{L}_k$ is the gradient of the local loss with respect to the weights, and $\mathcal{L}_k = \frac{1}{n_k}\sum_{i=1}^{n_k}(\hat{y}_i - y_i)^2$ is the local MSE loss computed over $n_k$ samples. After local training, the server aggregates using weighted averaging:
 \begin{equation}
     \mathbf{w}_{\text{global}}^{(r+1)} = \sum_{k \in S_r} \frac{n_k}{\sum_{j \in S_r} n_j} \cdot \mathbf{w}_k^{(r+1)}
     \label{eq:fedavg}
 \end{equation}
 where $\mathbf{w}_{\text{global}}^{(r+1)}$ is the updated global model, $n_k$ is the number of training samples held by client $k$, and the weighting fraction $\frac{n_k}{\sum_{j \in S_r} n_j}$ ensures clients with more data contribute proportionally.
-This process repeats for $R = 20$ communication rounds. Raw data never leaves individual homes, providing strong privacy guarantees, bounded theoretically by the federated convergence characteristic length:
+This process repeats for $R$ communication rounds. Raw data never leaves individual homes, providing strong privacy guarantees, bounded theoretically by the federated convergence characteristic length:
 \begin{equation}
     \mathcal{O}\left(\frac{\kappa}{\mu R E} + \frac{\sigma^2}{\sqrt{N K R E}}\right)
     \label{eq:fed_convergence}
@@ -257,28 +257,28 @@ The dynamic pricing mechanism is formulated as a single-leader multi-follower St
     U_i(c_i) = w_i \sqrt{c_i}
     \label{eq:user_utility}
 \end{equation}
-where $U_i(c_i)$ is the utility of user $i$, $c_i$ is the user's electricity consumption in kW, and $w_i \sim 15.0 \cdot \mathcal{U}(0.8, 1.2)$ is a randomized comfort weight sampled from a uniform distribution to model heterogeneous user preferences. Given price $p$ (in INR/kWh), user $i$ maximizes net utility $U_i(c_i) - p \cdot c_i$.
+where $U_i(c_i)$ is the utility of user $i$, $c_i$ is the user's electricity consumption in kW, and $w_i$ is a randomized comfort weight sampled from a uniform distribution to model heterogeneous user preferences. Given price $p$ (in INR/kWh), user $i$ maximizes net utility $U_i(c_i) - p \cdot c_i$.
 
 \subsubsection{Follower Best Response} Setting $\frac{\partial}{\partial c_i}[U_i - p \cdot c_i] = 0$:
 \begin{equation}
     \frac{w_i}{2\sqrt{c_i^*}} = p \implies c_i^*(p) = \min\left(\left(\frac{w_i}{2p}\right)^2, \; C_{\max,i}\right)
     \label{eq:best_response}
 \end{equation}
-where $c_i^*(p)$ is the optimal consumption of user $i$ as a function of price $p$, $w_i$ is the user's comfort weight, and $C_{\max,i}$ is the maximum consumption capacity derived from appliance rated powers scaled by a realistic capacity factor ($\sim$4.9\,kW per home). The $\min$ operator clips the response to prevent physically infeasible consumption.
+where $c_i^*(p)$ is the optimal consumption of user $i$ as a function of price $p$, $w_i$ is the user's comfort weight, and $C_{\max,i}$ is the maximum consumption capacity derived from appliance rated powers scaled by a realistic capacity factor. The $\min$ operator clips the response to prevent physically infeasible consumption.
 
-\subsubsection{Leader (Grid Operator) Objective} The leader maximizes profit subject to supply capacity $K = 150$ kW:
+\subsubsection{Leader (Grid Operator) Objective} The leader maximizes profit subject to supply capacity $K$:
 \begin{equation}
     \max_p \; \Pi(p) = p \cdot \sum_{i=1}^{N} c_i^*(p) - \frac{1}{2}\max\left(0, \sum_{i=1}^{N}c_i^*(p) - K\right)^2
     \label{eq:leader_obj}
 \end{equation}
-where $\Pi(p)$ is the leader's profit function, $p$ is the price set by the leader, $N = 50$ is the number of follower users, $c_i^*(p)$ is each follower's best response consumption, and $K = 150$\,kW is the total supply capacity. The first term is revenue, and the second is a quadratic penalty for exceeding grid capacity.
+where $\Pi(p)$ is the leader's profit function, $p$ is the price set by the leader, $N$ is the number of follower users, $c_i^*(p)$ is each follower's best response consumption, and $K$ is the total supply capacity. The first term is revenue, and the second is a quadratic penalty for exceeding grid capacity.
 
-\subsubsection{Equilibrium Computation} The Stackelberg equilibrium $p^*$ is found via iterative grid search with progressive refinement. In each of 50 iterations, the price range is narrowed around the current best, evaluating 30 candidate prices per iteration. The equilibrium satisfies:
+\subsubsection{Equilibrium Computation} The Stackelberg equilibrium $p^*$ is found via iterative grid search with progressive refinement. In each iteration, the price range is narrowed around the current best, evaluating a set of candidate prices. The equilibrium satisfies:
 \begin{equation}
     \frac{\partial \Pi}{\partial p}\bigg|_{p=p^*} = 0, \quad p^* \in [p_{\min}, p_{\max}] = [3, 15] \; \text{INR/kWh}
     \label{eq:equilibrium}
 \end{equation}
-where $\Pi$ is the leader's profit, $p^*$ is the Stackelberg equilibrium price, $\frac{\partial \Pi}{\partial p}$ is the marginal profit with respect to price, and $p_{\min} = 3$ and $p_{\max} = 15$\,INR/kWh bound the feasible price range.
+where $\Pi$ is the leader's profit, $p^*$ is the Stackelberg equilibrium price, $\frac{\partial \Pi}{\partial p}$ is the marginal profit with respect to price, and $p_{\min}$ and $p_{\max}$ bound the feasible price range.
 
 \subsubsection{Hourly Stackelberg} The game runs independently for each of 24 hours, with hourly demand profiles derived from the GRU forecaster:
 \begin{equation}
@@ -290,7 +290,7 @@ where $p_h^{\text{SG}}$ is the Stackelberg equilibrium price at hour $h$, and $\
 % ────────────────────────────────────────────────────────
 \subsection{Differential Evolution (DE) Schedule Optimization}
 
-The DE module optimizes binary appliance schedules $\mathbf{S} \in \{0,1\}^{A \times T}$ where $A = 7$ appliances and $T = 96$ time slots (15-minute resolution), using the DE/rand/1/bin strategy.
+The DE module optimizes binary appliance schedules $\mathbf{S} \in \{0,1\}^{A \times T}$ where $A$ is the total number of appliances and $T$ is the number of time slots, using the DE/rand/1/bin strategy.
 
 \subsubsection{Initial Population} A population of $N_p = 100$ candidate solutions is initialized. The first 20\% are seeded from the user's preferred schedule with 10--30\% random bit flips to ensure diversity:
 \begin{equation}
@@ -300,14 +300,14 @@ The DE module optimizes binary appliance schedules $\mathbf{S} \in \{0,1\}^{A \t
     \end{cases}
     \label{eq:init_pop}
 \end{equation}
-where $\mathbf{S}_i^{(0)}$ is the $i$-th initial candidate schedule, $\mathbf{S}_{\text{pref}}$ is the user's preferred (default) schedule, $\oplus$ denotes element-wise XOR (bit-flip) operation, $\mathcal{B}(\rho)$ denotes a Bernoulli mask where each element is 1 with probability $\rho$, and $N_p = 100$ is the population size.
+where $\mathbf{S}_i^{(0)}$ is the $i$-th initial candidate schedule, $\mathbf{S}_{\text{pref}}$ is the user's preferred (default) schedule, $\oplus$ denotes element-wise XOR (bit-flip) operation, $\mathcal{B}(\rho)$ denotes a Bernoulli mask where each element is 1 with probability $\rho$, and $N_p$ is the population size.
 
 \subsubsection{Mutation} For each individual $\mathbf{S}_i$, a mutant vector is generated using DE/rand/1:
 \begin{equation}
     \mathbf{v}_i = \mathbf{S}_{r_1} + F \cdot (\mathbf{S}_{r_2} - \mathbf{S}_{r_3})
     \label{eq:mutation}
 \end{equation}
-where $\mathbf{v}_i$ is the continuous mutant vector for individual $i$, $\mathbf{S}_{r_1}$, $\mathbf{S}_{r_2}$, $\mathbf{S}_{r_3}$ are three distinct randomly selected individuals from the population, $F = 0.8$ is the mutation scaling factor, and the subtraction $\mathbf{S}_{r_2} - \mathbf{S}_{r_3}$ produces the difference vector. The continuous mutant is binarized via a sigmoid threshold: $\mathbf{v}_i^{\text{bin}} = \mathbb{1}[\sigma(5(\mathbf{v}_i - 0.5)) > 0.5]$, where $\mathbb{1}[\cdot]$ is the indicator function and $\sigma(\cdot)$ is the sigmoid function.
+where $\mathbf{v}_i$ is the continuous mutant vector for individual $i$, $\mathbf{S}_{r_1}$, $\mathbf{S}_{r_2}$, $\mathbf{S}_{r_3}$ are three distinct randomly selected individuals from the population, $F$ is the mutation scaling factor, and the subtraction $\mathbf{S}_{r_2} - \mathbf{S}_{r_3}$ produces the difference vector. The continuous mutant is binarized via a sigmoid threshold: $\mathbf{v}_i^{\text{bin}} = \mathbb{1}[\sigma(5(\mathbf{v}_i - 0.5)) > 0.5]$, where $\mathbb{1}[\cdot]$ is the indicator function and $\sigma(\cdot)$ is the sigmoid function.
 
 \subsubsection{Binomial Crossover} A trial vector is formed by component-wise selection:
 \begin{equation}
@@ -317,7 +317,7 @@ where $\mathbf{v}_i$ is the continuous mutant vector for individual $i$, $\mathb
     \end{cases}
     \label{eq:crossover}
 \end{equation}
-where $u_{i,j}$ is the $j$-th component of the trial vector for individual $i$, $v_{i,j}^{\text{bin}}$ is the corresponding binarized mutant component, $S_{i,j}$ is the current target individual's $j$-th component, $CR = 0.9$ is the crossover rate, $\text{rand}(0,1)$ is a uniform random number, and $j_{\text{rand}}$ is a randomly chosen index that ensures at least one dimension is inherited from the mutant.
+where $u_{i,j}$ is the $j$-th component of the trial vector for individual $i$, $v_{i,j}^{\text{bin}}$ is the corresponding binarized mutant component, $S_{i,j}$ is the current target individual's $j$-th component, $CR$ is the crossover rate, $\text{rand}(0,1)$ is a uniform random number, and $j_{\text{rand}}$ is a randomly chosen index that ensures at least one dimension is inherited from the mutant.
 
 \subsubsection{Selection} The trial replaces the target only if it achieves lower fitness:
 \begin{equation}
@@ -349,12 +349,12 @@ The constraint engine evaluates physical and operational feasibility of candidat
     \Phi_{\text{constraints}} = \underbrace{\max\left(0, E_{\text{total}} - E_{\max}\right)^2}_{\text{Daily energy cap}} + \underbrace{\sum_h \max\left(0, L_h - L_{\max}\right)^2}_{\text{Hourly power cap}}
     \label{eq:constraints}
 \end{equation}
-where $E_{\text{total}} = \sum_{a,h} S_{a,h} \cdot P_a \cdot \Delta t$ is the total daily energy consumption, $S_{a,h}$ is the ON/OFF state of appliance $a$ at slot $h$, $P_a$ is the rated power, $\Delta t = 0.25$\,h is the time slot duration, $E_{\max} = 80$\,kWh is the maximum allowable daily energy, $L_h = \sum_a S_{a,h} \cdot P_a$ is the instantaneous load at hour $h$, and $L_{\max} = 15$\,kW is the maximum allowable hourly power. The feasible set defining all strict operational states forms a rugged discontinuous subspace:
+where $E_{\text{total}} = \sum_{a,h} S_{a,h} \cdot P_a \cdot \Delta t$ is the total daily energy consumption, $S_{a,h}$ is the ON/OFF state of appliance $a$ at slot $h$, $P_a$ is the rated power, $\Delta t$ is the time slot duration, $E_{\max}$ is the maximum allowable daily energy limit, $L_h = \sum_a S_{a,h} \cdot P_a$ is the instantaneous load at hour $h$, and $L_{\max}$ is the maximum allowable hourly peak power. The feasible set defining all strict operational states forms a rugged discontinuous subspace:
 \begin{equation}
     \Omega = \left\{ \mathbf{S} \in \{0,1\}^{A \times T} \ \middle| \ \Phi_{\text{constraints}}(\mathbf{S}) \leq \epsilon_{\text{tol}} \right\}
     \label{eq:feasible_space}
 \end{equation}
-where $\Omega$ is the feasible solution space, $\mathbf{S}$ is a binary schedule matrix of $A = 7$ appliances over $T = 96$ time slots, $\Phi_{\text{constraints}}(\mathbf{S})$ is the constraint violation penalty, and $\epsilon_{\text{tol}}$ is a small numerical tolerance threshold for feasibility.
+where $\Omega$ is the feasible solution space, $\mathbf{S}$ is a binary schedule matrix of $A$ appliances over $T$ time slots, $\Phi_{\text{constraints}}(\mathbf{S})$ is the constraint violation penalty, and $\epsilon_{\text{tol}}$ is a small numerical tolerance threshold for feasibility.
 
 % ############################################################
 %              SECTION 2: RESULTS AND DISCUSSION
