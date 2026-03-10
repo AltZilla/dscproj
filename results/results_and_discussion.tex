@@ -245,16 +245,7 @@ This process repeats for $R = 20$ communication rounds. Raw data never leaves in
 \end{equation}
 where $\kappa$ is the condition number of the loss landscape, $\mu$ is the strong convexity constant, $R$ is the number of communication rounds, $E$ is the number of local epochs per round, $\sigma^2$ is the variance of the local gradients across clients, $N$ is the number of participating homes, and $K$ is the total number of clients.
 
-\subsubsection{Evaluation Metrics} Model performance is measured using three complementary metrics:
-\begin{equation}
-    \text{MAE} = \frac{1}{n}\sum_{i=1}^{n}|\hat{y}_i - y_i|, \quad \text{RMSE} = \sqrt{\frac{1}{n}\sum_{i=1}^{n}(\hat{y}_i - y_i)^2}
-    \label{eq:mae_rmse}
-\end{equation}
-\begin{equation}
-    \text{MAPE} = \frac{100}{n}\sum_{i=1}^{n}\left|\frac{y_i - \hat{y}_i}{y_i}\right|, \quad \forall \; |y_i| > 0.1
-    \label{eq:mape}
-\end{equation}
-where $n$ is the total number of test samples, $y_i$ is the $i$-th ground truth power consumption value, $\hat{y}_i$ is the corresponding model prediction, and the MAPE threshold $|y_i| > 0.1$ excludes near-zero ground truth values that would cause division instability.
+
 
 % ────────────────────────────────────────────────────────
 \subsection{Hierarchical Stackelberg Game Pricing}
@@ -506,7 +497,11 @@ where $\nabla \mathcal{L}_k$ is the gradient of client $k$'s local loss, $\nabla
 \label{fig:fl_rmse}
 \end{figure}
 
-Fig.~\ref{fig:fl_rmse} compares the Root Mean Square Error convergence of four federated strategies. The proposed FedAvg-GRU achieves RMSE $= 2.502$\,kW. The RMSE is computed as per Eq.~\eqref{eq:mae_rmse}. The FedAvg protocol's advantage over FedSGD stems from the multiple local epochs ($E = 5$) per communication round, which enables each client to perform more gradient steps on its local data before aggregation. With sequence length $L = 16$ (4 hours at 15-minute resolution), the GRU captures medium-term temporal dependencies in the latent space. The convergence gap between FedAvg and centralized training quantifies the ``price of privacy''---the marginal performance sacrifice in exchange for complete data locality. This gap diminishes with communication rounds $R$, following $\Delta(R) \propto \frac{1}{\sqrt{R}}$, confirming theoretical convergence guarantees of FedAvg under non-i.i.d.\ data distributions.
+Fig.~\ref{fig:fl_rmse} compares the Root Mean Square Error convergence of four federated strategies. The proposed FedAvg-GRU achieves RMSE $= 2.502$\,kW. The RMSE is computed as per Eq.~\eqref{eq:mae_rmse}. The FedAvg protocol's advantage over FedSGD stems from the multiple local epochs ($E = 5$) per communication round, which enables each client to perform more gradient steps on its local data before aggregation. With sequence length $L = 16$ (4 hours at 15-minute resolution), the GRU captures medium-term temporal dependencies in the latent space. The convergence gap between FedAvg and centralized training quantifies the ``price of privacy''---the marginal performance sacrifice in exchange for complete data locality. This gap diminishes with communication rounds $R$, bounded by the convergence rate:
+\begin{equation}
+    \Delta(R) \propto \mathcal{O}\left(\frac{1}{\sqrt{R}}\right) \implies \text{RMSE}_{\text{FedAvg}} - \text{RMSE}_{\text{Central}} \sim \frac{c}{\sqrt{R}}
+\end{equation}
+where $\Delta(R)$ is the performance gap between federated and centralized models at round $R$, and $c$ is a constant dependent on the data heterogeneity (non-i.i.d. nature) across the participating smart homes. This confirms the theoretical convergence guarantees of FedAvg.
 
 % ================================================================
 % GRAPH 5
@@ -520,7 +515,11 @@ Fig.~\ref{fig:fl_rmse} compares the Root Mean Square Error convergence of four f
 \label{fig:privacy_tradeoff}
 \end{figure}
 
-Fig.~\ref{fig:privacy_tradeoff} analyzes the Mean Absolute Percentage Error as a function of client participation fraction $\rho \in [0.1, 1.0]$. The proposed FedGRU achieves MAPE $= 60.97\%$ at the default $\rho = 0.4$ (20 out of 50 homes). The relatively high MAPE is attributed to near-zero consumption periods in ground truth data that inflate the percentage metric, while absolute error (MAE $= 1.846$\,kW) remains practical. The MAPE improvement follows a diminishing returns curve $\text{MAPE}(\rho) = \text{MAPE}_{\infty} + \alpha \cdot e^{-\gamma \rho}$, where $\rho$ is the client participation fraction, $\text{MAPE}_{\infty}$ is the asymptotic error at full participation, $\alpha$ captures the initial error reduction rate, and $\gamma$ governs the saturation behavior. For $N = 50$ homes with 30 days of data, each local model sees only $\sim$2,880 records, while federated aggregation enables implicit access to $\sim$144,000 records through weight sharing. The shaded confidence bands show that the proposed framework exhibits lower variance across random client selections, attributable to the VAE's noise-invariant latent representation.
+Fig.~\ref{fig:privacy_tradeoff} analyzes the Mean Absolute Percentage Error as a function of client participation fraction $\rho \in [0.1, 1.0]$. The proposed FedGRU achieves MAPE $= 60.97\%$ at the default $\rho = 0.4$ (20 out of 50 homes). The relatively high MAPE is attributed to near-zero consumption periods in ground truth data that inflate the percentage metric, while absolute error (MAE $= 1.846$\,kW) remains practical. The MAPE improvement follows a diminishing returns curve modeled by the exponential decay function:
+\begin{equation}
+    \text{MAPE}(\rho) = \text{MAPE}_{\infty} + \alpha \cdot e^{-\gamma \rho}
+\end{equation}
+where $\rho$ is the client participation fraction, $\text{MAPE}_{\infty}$ represents the asymptotic theoretical minimum error achievable at full 100\% participation, $\alpha$ captures the initial capacity for error reduction when moving from local to federated training, and $\gamma$ is the decay constant that governs the saturation behavior (how quickly the error stops improving as more clients are added). For $N = 50$ homes with 30 days of data, each local model sees only $\sim$2,880 records, while federated aggregation enables implicit access to $\sim$144,000 records through weight sharing. The shaded confidence bands show that the proposed framework exhibits lower variance across random client selections, attributable to the VAE's noise-invariant latent representation.
 
 % ================================================================
 % GRAPH 6
@@ -548,7 +547,11 @@ Fig.~\ref{fig:sg_convergence} compares the convergence behavior of four pricing 
 \label{fig:hourly_price}
 \end{figure}
 
-Fig.~\ref{fig:hourly_price} presents the dual-axis visualization of hourly Stackelberg equilibrium prices alongside the resulting demand profiles. The proposed framework produces dynamic prices that respond to hourly demand variations through independent per-hour equilibrium computation (Eq.~\eqref{eq:hourly_sg}). The blended pricing formula $p_h^{\text{blend}} = 0.5 \times p_h^{\text{TOU}} + 0.5 \times p_h^{\text{SG}}$ smooths the equilibrium signal with the TOU baseline, where $p_h^{\text{blend}}$ is the blended price at hour $h$, $p_h^{\text{TOU}}$ is the static TOU price, and $p_h^{\text{SG}}$ is the Stackelberg equilibrium price, preventing excessive volatility. The area between the original and optimized demand curves quantifies the total load shifted, representing a fundamental transformation from a peak-concentrated to a valley-filled load profile driven by the combined effect of game-theoretic pricing and evolutionary optimization.
+Fig.~\ref{fig:hourly_price} presents the dual-axis visualization of hourly Stackelberg equilibrium prices alongside the resulting demand profiles. The proposed framework produces dynamic prices that respond to hourly demand variations through independent per-hour equilibrium computation (Eq.~\eqref{eq:hourly_sg}). To prevent excessive price volatility and drastic market shocks, the final pricing signal is smoothed using a linear blending function:
+\begin{equation}
+    p_h^{\text{blend}} = \omega_1 \cdot p_h^{\text{TOU}} + \omega_2 \cdot p_h^{\text{SG}}
+\end{equation}
+where $p_h^{\text{blend}}$ is the final blended price offered to consumers at hour $h$, $p_h^{\text{TOU}}$ is the base static Time-of-Use price, $p_h^{\text{SG}}$ is the dynamic Stackelberg equilibrium price computed for that hour, and the weighting factors $\omega_1 = 0.5$ and $\omega_2 = 0.5$ balance the influence of static policy versus dynamic market conditions. The area between the original and optimized demand curves quantifies the total load shifted, representing a fundamental transformation from a peak-concentrated to a valley-filled load profile driven by the combined effect of game-theoretic pricing and evolutionary optimization.
 
 % ================================================================
 % GRAPH 8
@@ -576,7 +579,15 @@ Fig.~\ref{fig:de_fitness} compares the fitness convergence of the proposed DE/ra
 \label{fig:cost_reduction}
 \end{figure}
 
-Fig.~\ref{fig:cost_reduction} presents the daily energy cost reduction percentages across five methods. The proposed framework achieves $46.2\%$ cost reduction (1308\,INR $\to$ 704\,INR) compared to the unoptimized baseline. The cost reduction is computed as $\Delta C = (C_{\text{orig}} - C_{\text{opt}}) / C_{\text{orig}} \times 100\%$, where $\Delta C$ is the percentage cost reduction, $C_{\text{orig}}$ is the original daily cost, $C_{\text{opt}}$ is the optimized cost, and $C = \sum_{a,h} S_{a,h} \cdot P_a \cdot p_h \cdot \Delta t$ with $S_{a,h}$ being the ON/OFF state, $P_a$ the rated power, $p_h$ the price at hour $h$, and $\Delta t$ the time slot duration. The proposed framework's advantage is threefold: (1) the Stackelberg pricing provides optimal price signals that the DE directly optimizes against, creating a tighter feedback loop than static prices used by BDIA and STFL; (2) the 8-term fitness function captures multi-dimensional trade-offs that simple cost-only objectives miss; and (3) the VAE-GRU forecast alignment penalty nudges schedules toward predicted demand patterns, establishing a stable fixed point theorem bounded by:
+Fig.~\ref{fig:cost_reduction} presents the daily energy cost reduction percentages across five methods. The proposed framework achieves $46.2\%$ cost reduction (1308\,INR $\to$ 704\,INR) compared to the unoptimized baseline. The percentage daily cost reduction is mathematically formulated as:
+\begin{equation}
+    \Delta C = \frac{C_{\text{orig}} - C_{\text{opt}}}{C_{\text{orig}}} \times 100\%
+\end{equation}
+where $\Delta C$ is the cost savings percentage, $C_{\text{orig}}$ is the original daily cost before optimization, and $C_{\text{opt}}$ is the optimized minimum cost. The total daily cost $C$ for any given schedule is calculated via the cumulative sum:
+\begin{equation}
+    C = \sum_{a=1}^{A}\sum_{h=1}^{T} S_{a,h} \cdot P_a \cdot p_h \cdot \Delta t
+\end{equation}
+with $S_{a,h} \in \{0, 1\}$ being the binary ON/OFF activation state of appliance $a$ during time slot $h$, $P_a$ the rated power consumption profile of the appliance in kW, $p_h$ the dynamically determined electricity price at that hour, and $\Delta t$ the duration of the scheduling slot in hours. The proposed framework's advantage is threefold: (1) the Stackelberg pricing provides optimal price signals that the DE directly optimizes against, creating a tighter feedback loop than static prices used by BDIA and STFL; (2) the 8-term fitness function captures multi-dimensional trade-offs that simple cost-only objectives miss; and (3) the VAE-GRU forecast alignment penalty nudges schedules toward predicted demand patterns, establishing a stable fixed point theorem bounded by:
 \begin{equation}
     \left| \Delta C \right| \geq \delta_{\text{min}} \int_{0}^{T} (p_h^{\text{SG}} - p_h^{\text{TOU}}) \cdot \dot{c}_{shift}(t) dt
 \end{equation}
@@ -594,7 +605,11 @@ where $\Delta C$ is the cost savings, $\delta_{\text{min}}$ is the minimum savin
 \label{fig:par}
 \end{figure}
 
-Fig.~\ref{fig:par} presents the Peak-to-Average Ratio (PAR) across six configurations. The proposed DE-based optimizer achieves $23.0\%$ peak load reduction. The PAR metric is defined as $\text{PAR} = L_{\max} / \bar{L}$, where $L_{\max} = \max_h \sum_a S_{a,h} \cdot P_a$ is the maximum hourly load across all time slots, $\bar{L} = \frac{1}{24}\sum_h \sum_a S_{a,h} \cdot P_a$ is the average hourly load, $S_{a,h}$ is the ON/OFF state of appliance $a$ at hour $h$, and $P_a$ is the rated power of appliance $a$. A PAR approaching 1.0 indicates perfectly uniform load distribution. The improvement is driven by the DE fitness function's peak penalty $\Phi_{\text{peak}} = \max(0, \frac{L_{\max}}{\bar{L}} - 1.5) \times 30$ and grid capacity penalty $\Phi_{\text{grid}} = \sum_h \max(0, L_h - K)^2 \times 50$, where $L_h$ is the load at hour $h$ and $K$ is the grid capacity.
+Fig.~\ref{fig:par} presents the Peak-to-Average Ratio (PAR) across six configurations. The proposed DE-based optimizer achieves $23.0\%$ peak load reduction. The PAR metric, which quantifies grid stress and peak demand concentration, is formally defined as:
+\begin{equation}
+    \text{PAR} = \frac{L_{\max}}{\bar{L}} = \frac{\max_h \left( \sum_{a=1}^A S_{a,h} \cdot P_a \right)}{\frac{1}{24} \sum_{h=1}^{24} \left( \sum_{a=1}^A S_{a,h} \cdot P_a \right)}
+\end{equation}
+where $L_{\max}$ represents the maximum instantaneous hourly load (the peak demand) out of all daily time slots, and $\bar{L}$ represents the uniform average hourly load over the 24-hour cycle. Here, $S_{a,h}$ is the ON/OFF status of appliance $a$ at hour $h$, and $P_a$ is its rated power. A PAR approaching 1.0 indicates perfectly uniform load distribution. The improvement is driven by the DE fitness function's peak penalty $\Phi_{\text{peak}} = \max(0, \frac{L_{\max}}{\bar{L}} - 1.5) \times 30$ and grid capacity penalty $\Phi_{\text{grid}} = \sum_h \max(0, L_h - K)^2 \times 50$, where $L_h$ is the load at hour $h$ and $K$ is the grid capacity.
 
 % ================================================================
 % GRAPH 11
@@ -608,7 +623,11 @@ Fig.~\ref{fig:par} presents the Peak-to-Average Ratio (PAR) across six configura
 \label{fig:load_dist}
 \end{figure}
 
-Fig.~\ref{fig:load_dist} visualizes the hourly load profiles before and after optimization. The proposed framework demonstrates significant peak shaving during expensive hours as the DE's cost term $\sum S_{a,h} P_a p_h$ becomes prohibitively expensive for deferrable loads, where $S_{a,h}$ is the ON/OFF state, $P_a$ is the rated power, and $p_h$ is the price at hour $h$. Valley filling occurs as the optimizer shifts EV charging (7.0\,kW) and water heating (4.5\,kW) to exploit low off-peak prices. The load standard deviation across hours $\sigma_L = \sqrt{\frac{1}{24}\sum_h (L_h - \bar{L})^2}$, where $L_h$ is the load at hour $h$ and $\bar{L}$ is the mean hourly load, is substantially lower for the proposed framework compared to all baselines, confirming superior load balancing.
+Fig.~\ref{fig:load_dist} visualizes the hourly load profiles before and after optimization. The proposed framework demonstrates significant peak shaving during expensive hours as the DE's cost term $\sum S_{a,h} P_a p_h$ becomes prohibitively expensive for deferrable loads, where $S_{a,h}$ is the ON/OFF state, $P_a$ is the rated power, and $p_h$ is the price at hour $h$. Valley filling occurs as the optimizer shifts EV charging (7.0\,kW) and water heating (4.5\,kW) to exploit low off-peak prices. The effectiveness of load balancing across the daily cycle is rigorously quantified by the load standard deviation across all hours:
+\begin{equation}
+    \sigma_L = \sqrt{\frac{1}{24}\sum_{h=1}^{24} (L_h - \bar{L})^2}
+\end{equation}
+where $\sigma_L$ measures the volatility or variance of the power consumption, $L_h$ is the total aggregated consumption load at specific hour $h$, and $\bar{L}$ is the mean baseline load across the entire day. The proposed framework demonstrates a substantially lower $\sigma_L$ compared to all baselines, confirming highly effective valley-filling and peak-shaving capabilities.
 
 % ================================================================
 % GRAPH 12
@@ -622,7 +641,11 @@ Fig.~\ref{fig:load_dist} visualizes the hourly load profiles before and after op
 \label{fig:radar}
 \end{figure}
 
-Fig.~\ref{fig:radar} presents a radar chart comparing the four frameworks across six normalized performance dimensions. The aggregate multi-objective score is computed as $\mathcal{S} = \frac{1}{M}\sum_{m=1}^{M} s_m$, where $\mathcal{S}$ is the overall score, $M = 6$ is the number of performance dimensions, and $s_m \in [0,1]$ is the normalized score on the $m$-th dimension. The radar area, computed as $A = \frac{1}{2}\sum_{m=1}^{M} s_m \cdot s_{m+1} \cdot \sin(\frac{2\pi}{M})$, where $A$ is the polygon area and $s_{M+1} = s_1$ wraps cyclically, provides a geometric measure of overall performance. The BDIA approach scores poorly on Privacy due to its centralized learning. MADRL achieves strong Comfort through reward shaping but sacrifices Convergence Speed. STFL achieves good Privacy through federated design but lacks game-theoretic pricing and evolutionary optimization. The proposed framework's balanced superiority validates the complementary integration of all four algorithmic pillars: VAE (representation), FedGRU (privacy-preserving forecasting), Stackelberg (optimal pricing), and DE (constrained schedule optimization).
+Fig.~\ref{fig:radar} presents a radar chart comparing the four frameworks across six normalized performance dimensions. The aggregate multi-objective capabilities are geometrically quantified by two metrics: the mean scalar score $\mathcal{S}$ and the enclosed radar polygon area $A$:
+\begin{equation}
+    \mathcal{S} = \frac{1}{M}\sum_{m=1}^{M} s_m, \quad A = \frac{1}{2}\sum_{m=1}^{M} s_m \cdot s_{m+1} \cdot \sin\left(\frac{2\pi}{M}\right)
+\end{equation}
+where $M = 6$ is the total number of evaluation dimensions, $s_m \in [0,1]$ is the MinMax normalized performance score on the $m$-th evaluation dimension, and $s_{M+1} \equiv s_1$ to ensure cyclic polygon closure. Area $A$ naturally rewards models that perform consistently well across all metrics, penalizing those with high variance. The BDIA approach scores poorly on Privacy due to its centralized learning. MADRL achieves strong Comfort through reward shaping but sacrifices Convergence Speed. STFL achieves good Privacy through federated design but lacks game-theoretic pricing and evolutionary optimization. The proposed framework's balanced superiority validates the complementary integration of all four algorithmic pillars: VAE (representation), FedGRU (privacy-preserving forecasting), Stackelberg (optimal pricing), and DE (constrained schedule optimization).
 
 % ────────────────────────────────────────────────────────
 \subsection{Comparative Performance Analysis}
