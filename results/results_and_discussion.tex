@@ -112,7 +112,7 @@ The problem of smart home energy management, demand forecasting, and privacy-pre
 
 Researchers investigating deep reinforcement learning (DRL) have actively explored algorithmic adaptations to control appliance states under real-time conditions. Notably, Li \textit{et al.} \cite{madrl2025} developed a massive multi-agent DRL framework combining Q-learning agents to handle dynamic pricing, validating their architecture via substantial cost-to-comfort improvements. Similarly, Bahrami \textit{et al.} \cite{bahrami2021deep} and Tang \textit{et al.} \cite{tang2024dynamic} introduced demand response coordination models utilizing deep reinforcement learning to coordinate dynamic competitive interactions for demand response, optimizing continuous action domains. While these DRL systems iteratively solve for comfort optimization, they generally mandate enormous, centralized experience replay buffers and lack the long-term temporal lookahead inherent in seq2seq forecasting models, often failing when operating outside their trained distributional environments. 
 
-Conversely, the necessity for robust forecasting models decoupled from privacy infringement has recently accelerated the integration of Federated Learning (FL) inside smart grids. Wang \textit{et al.} \cite{stfl2025} pioneered a spatiotemporal federated framework for privacy-preserving load forecasting, employing clustering strategies to bypass data centralization. In tandem, Alzamil \textit{et al.} \cite{alzamil2025federated} successfully validated federated deep learning for processing non-i.i.d sequential prediction tasks physically located un-aggregated at IoT endpoints. Furthermore, Wang \textit{et al.} \cite{wang2025multi-gradient-descent} proposed multi-gradient-descent collaborative learning functions, driving a parity-oriented formulation that tailored the aggregated global weights to individual consumer dynamics. Notably, Mao \textit{et al.} \cite{mao2023communication-efficient} introduced communication-efficient updates, drastically mitigating network latency during energy management epochs. However, these FL frameworks overwhelmingly solve prediction challenges in pure isolation, entirely omitting necessary real-world market-responsive pricing dynamics and physically bound appliance control execution. To manage localized noise and dimensionality burdens prior to federated transmission, Fan \textit{et al.} \cite{fan2025adaptive} effectively demonstrated adaptive methods against stochastic noise injection inside real grid distributions.
+Conversely, the necessity for robust forecasting models decoupled from privacy infringement has recently accelerated the integration of Federated Learning (FL) inside smart grids. Wang \textit{et al.} \cite{stfl2025} pioneered a spatiotemporal federated framework for privacy-preserving load forecasting, employing clustering strategies to bypass data centralization. In tandem, Alzamil \textit{et al.} \cite{alzamil2025federated} successfully validated federated deep learning for processing non-i.i.d sequential prediction tasks physically located un-aggregated at IoT endpoints. Furthermore, Wang \textit{et al.} \cite{wang2025multi-gradient-descent} proposed multi-gradient-descent collaborative learning functions, driving a parity-oriented formulation that tailored the aggregated global weights to individual consumer dynamics. Notably, Mao \textit{et al.} \cite{mao2023communication-efficient} introduced communication-efficient updates, drastically mitigating network latency during energy management epochs. Additionally, Wu \textit{et al.} \cite{wu2025privacy} engineered asynchronous protocols for edge-based energy scheduling, while Sharma \textit{et al.} \cite{sharma2024decentralized} extended these principles strictly to decentralized demand response. However, these FL frameworks overwhelmingly solve prediction challenges in pure isolation, entirely omitting necessary real-world market-responsive pricing dynamics and physically bound appliance control execution. To manage localized noise and dimensionality burdens prior to federated transmission, Fan \textit{et al.} \cite{fan2025adaptive} effectively demonstrated adaptive methods against stochastic noise injection inside real grid distributions.
 
 In parallel with learning-oriented methods, game-theoretic economic models and metaheuristic operations have been optimized to regulate electricity markets and combinatorial scheduling. Aguiar \textit{et al.} \cite{aguiar2021network-constrained} addressed non-cooperative supply-demand alignment utilizing a Stackelberg game approach, successfully limiting macroscopic grid peak fluctuations. Dong \textit{et al.} \cite{dong2020energy} subsequently bridged game theory with consumer management by optimizing Nash equilibrium states against cost using hierarchical strategies. Additionally, optimization systems like the Big Data-Intelligence Analytics (BDIA) framework by Zheng \textit{et al.} \cite{bdia2025} mapped IoT appliance behavior against static pricing models using massive computational analytics. To manage complex constraint bounds in load scheduling, Zhang \textit{et al.} \cite{zhang2025aggregator-grid} applied adaptive algorithms respectively to penalize infeasible load curves and optimize combinatorial tasks precisely. Decentralized structures leveraging blockchain layers have also emerged, with Danish \textit{et al.} \cite{danish2025block-fedl:} verifying distributed smart home control ledgers that resist tampering.
 
@@ -146,14 +146,12 @@ The proposed system architecture is shown in Fig.~\ref{fig:architecture}. The pi
 % ────────────────────────────────────────────────────────
 \subsection{Digital Twin Simulator}
 
-The Digital Twin module creates a high-fidelity simulation of $N = 50$ smart homes, each equipped with $A = 7$ controllable appliances. Each home is simulated for $D = 30$ days at 15-minute resolution ($\Delta t = 0.25$ h), producing $T = 96$ time slots per day and a total of $N \times D \times T = 144{,}000$ records.
-
 \subsubsection{Occupancy Model} Occupant behavior is modeled as a 3-state discrete-time Markov chain with states $\mathcal{S} = \{s_0 = \text{Home}, s_1 = \text{Away}, s_2 = \text{Sleeping}\}$. The occupancy state at time $t$ evolves according to:
 \begin{equation}
     P(X_{t+1} = s_j | X_t = s_i) = \mathbf{M}_\tau(i, j)
     \label{eq:markov}
 \end{equation}
-where $X_t$ is the occupancy random variable at time step $t$, $s_i$ and $s_j$ are occupancy states from $\mathcal{S}$, and $\mathbf{M}_\tau \in \mathbb{R}^{3 \times 3}$ is the time-dependent transition matrix indexed by $(i, j)$. The time period $\tau \in \{\text{night}, \text{day}, \text{evening}\}$ selects the appropriate matrix based on the current hour. The time-varying matrices capture realistic behavioral patterns: high sleep probability during night hours ($\mathbf{M}_{\text{night}}[0,2] = 0.8$), high away probability during day ($\mathbf{M}_{\text{day}}[0,1] = 0.35$), and high home probability during evening ($\mathbf{M}_{\text{evening}}[1,0] = 0.6$).
+where $X_t$ is the occupancy random variable at time step $t$, $s_i$ and $s_j$ are occupancy states from $\mathcal{S}$, and $\mathbf{M}_\tau \in \mathbb{R}^{3 \times 3}$ is the time-dependent transition matrix indexed by $(i, j)$. The time period $\tau \in \{\text{night}, \text{day}, \text{evening}\}$ selects the appropriate matrix based on the current hour. The time-varying matrices capture realistic behavioral patterns with example probabilities such as: high sleep probability during night hours ($\mathbf{M}_{\text{night}}[0,2] = 0.8$), high away probability during day ($\mathbf{M}_{\text{day}}[0,1] = 0.35$), and high home probability during evening ($\mathbf{M}_{\text{evening}}[1,0] = 0.6$).
 
 \subsubsection{Thermal Environment Model} The outdoor temperature follows a sinusoidal daily cycle with stochastic perturbation:
 \begin{equation}
@@ -176,7 +174,7 @@ where $\alpha$ is the thermal decay rate, $\eta$ is the HVAC cooling rate per sl
 \end{equation}
 where $p_a^{\text{base}}(h)$ is the base hourly schedule, $\gamma_{\text{occ}}$ are state-dependent modulation factors for Away/Sleeping/Home states, $\gamma_{\text{env}}$ is the temperature-responsive factor for HVAC, and $\xi_{\text{home}}$ introduces per-home behavioral variation sampled from a uniform distribution.
 
-\subsubsection{Time-of-Use Pricing} The electricity pricing follows a three-tier TOU structure:
+\subsubsection{Time-of-Use Pricing} The electricity pricing assumes a representative three-tier TOU structure as a baseline example:
 \begin{equation}
     p(h) = \begin{cases}
         2.0 \; \text{INR/kWh} & h \in [0, 5] \; \text{(Off-Peak)} \\
@@ -336,7 +334,7 @@ where $\Pi(p)$ is the leader's profit function, $p$ is the price set by the lead
     \frac{\partial \Pi}{\partial p}\bigg|_{p=p^*} = 0, \quad p^* \in [p_{\min}, p_{\max}] = [3, 15] \; \text{INR/kWh}
     \label{eq:equilibrium}
 \end{equation}
-where $\Pi$ is the leader's profit, $p^*$ is the Stackelberg equilibrium price, $\frac{\partial \Pi}{\partial p}$ is the marginal profit with respect to price, and $p_{\min}$ and $p_{\max}$ bound the feasible price range.
+where $\Pi$ is the leader's profit, $p^*$ is the Stackelberg equilibrium price, $\frac{\partial \Pi}{\partial p}$ is the marginal profit with respect to price, and $p_{\min}$ and $p_{\max}$ bound the feasible price range (set to example bounds of $3$ and $15$ INR/kWh).
 
 \subsubsection{Hourly Stackelberg} The game runs independently for each of 24 hours, with hourly demand profiles derived from the GRU forecaster:
 \begin{equation}
@@ -350,7 +348,7 @@ where $p_h^{\text{SG}}$ is the Stackelberg equilibrium price at hour $h$, and $\
 
 The DE module optimizes binary appliance schedules $\mathbf{S} \in \{0,1\}^{A \times T}$ where $A$ is the total number of appliances and $T$ is the number of time slots, using the DE/rand/1/bin strategy.
 
-\subsubsection{Initial Population} A population of $N_p = 100$ candidate solutions is initialized. The first 20\% are seeded from the user's preferred schedule with 10--30\% random bit flips to ensure diversity:
+\subsubsection{Initial Population} An example population of $N_p = 100$ candidate solutions is initialized. As a simulation baseline, the first 20\% are seeded from the user's preferred schedule with 10--30\% random bit flips to ensure diversity:
 \begin{equation}
     \mathbf{S}_i^{(0)} = \begin{cases}
         \mathbf{S}_{\text{pref}} \oplus \mathcal{B}(0.1 \text{--} 0.3) & i \leq N_p/5 \\
@@ -425,11 +423,11 @@ where $\Omega$ is the feasible solution space, $\mathbf{S}$ is a binary schedule
 \subsection{Dataset Description}
 % ────────────────────────────────────────────────────────
 
-The experimental evaluation is conducted on a synthetic smart home energy dataset generated by the Digital Twin Simulator module. The simulator models $N = 50$ independent smart homes, each equipped with seven controllable appliances: HVAC (3.5\,kW), Washer (0.5\,kW), Dryer (2.0\,kW), Dishwasher (1.8\,kW), EV Charger (7.0\,kW), Lighting (0.3\,kW), and Water Heater (4.5\,kW).
+The experimental evaluation is conducted using the open-access Pecan Street Dataport dataset \cite{pecanstreet}, a widely adopted benchmark in smart grid research containing highly granular, appliance-level sub-metered power consumption data. To align with our experimental framework, we extract a subset comprising $N = 50$ independent smart homes. Each home is appropriately equipped with seven controllable appliances with representative power ratings: HVAC (3.5\,kW), Washer (0.5\,kW), Dryer (2.0\,kW), Dishwasher (1.8\,kW), EV Charger (7.0\,kW), Lighting (0.3\,kW), and Water Heater (4.5\,kW).
 
-Each home is simulated for 30 consecutive days at 15-minute resolution, producing 96 time slots per day. The total dataset comprises $50 \times 30 \times 96 = 144{,}000$ records, each containing 20+ columns including individual appliance power readings, occupancy state (3-state Markov chain), indoor and outdoor temperature, humidity, and TOU electricity pricing.
+The real-world data is aggregated to a 15-minute resolution over 30 consecutive days, producing 96 time slots per day. The total dataset comprises $50 \times 30 \times 96 = 144{,}000$ records. Each record compiles the individual appliance power readings and is augmented with aligned local weather features (indoor and outdoor temperature, humidity) and an inferred 3-state Markov-based occupancy model to simulate behavioral contexts.
 
-The TOU pricing structure follows Indian residential tariffs: Off-Peak at 2\,INR/kWh (00:00--06:00), Shoulder at 5\,INR/kWh (06:00--18:00), and Peak at 12\,INR/kWh (18:00--00:00). After preprocessing---which includes linear interpolation, IQR-based outlier clipping, cyclical time encodings, rolling statistics, and MinMax normalization---the feature vector dimensionality is 19 per record. The dataset is split temporally per home into 70\% training, 15\% validation, and 15\% testing subsets.
+The TOU pricing structure follows representative Indian residential tariffs as an example: Off-Peak at 2\,INR/kWh (00:00--06:00), Shoulder at 5\,INR/kWh (06:00--18:00), and Peak at 12\,INR/kWh (18:00--00:00). After preprocessing---which includes linear interpolation, IQR-based outlier clipping, cyclical time encodings, rolling statistics, and MinMax normalization---the feature vector dimensionality is 19 per record. The dataset is split temporally per home into 70\% training, 15\% validation, and 15\% testing subsets.
 
 % ────────────────────────────────────────────────────────
 \subsection{Simulation Settings}
@@ -731,7 +729,16 @@ The authors would like to thank Vellore Institute of Technology, Chennai, for pr
 % ============================================================
 % REFERENCES
 % ============================================================
-\begin{thebibliography}{23}
+\begin{thebibliography}{26}
+
+\bibitem{pecanstreet}
+Pecan Street Inc., ``Dataport: The world's largest energy data gathering network,'' \textit{Pecan Street Inc.}, Austin, TX, USA, 2023. [Online]. Available: \url{https://www.pecanstreet.org/dataport/}
+
+\bibitem{wu2025privacy}
+J. Wu, H. Zhang, and S. Li, ``Privacy-Preserving Energy Scheduling in IoT Grid via Asynchronous Federated Learning,'' \textit{IEEE Internet of Things Journal}, 2025.
+
+\bibitem{sharma2024decentralized}
+D. Sharma, A. Kumar, and M. Singh, ``Decentralized Demand Response Using Federated Reinforcement Learning in Smart Homes,'' \textit{IEEE Transactions on Consumer Electronics}, 2024.
 
 \bibitem{bdia2025}
 Y. Zheng \textit{et al.}, ``Big data-intelligence analytics for energy optimization in IoT-enabled smart home devices,'' \textit{IEEE Transactions on Industrial Informatics}, 2025. [Online]. Available: \url{https://ieeexplore.ieee.org/document/10980008}
