@@ -58,6 +58,24 @@
 
 \maketitle
 
+% ============================================================
+%                        ABSTRACT
+% ============================================================
+\begin{abstract}
+The proliferation of Internet-of-Things (IoT) devices in smart homes has accelerated the deployment of advanced energy management systems capable of monitoring and controlling residential electricity consumption in real time. However, the dual imperatives of accurate demand forecasting and appliance schedule optimization remain fundamentally constrained by conflicting requirements: centralized learning approaches that enable high-accuracy predictions inherently risk exposing sensitive consumer behavioral data, while decentralized methods often sacrifice forecasting precision and lack economically informed cost signals. Existing solutions, including static Time-of-Use (TOU) pricing, independent deep reinforcement learning agents, and conventional federated frameworks, address these challenges in isolation, failing to jointly optimize privacy, forecast accuracy, grid stability, and user comfort under a unified and physically constrained architecture.
+
+This paper presents a six-stage hybrid intelligent framework that integrates a Digital Twin Simulator for high-fidelity synthetic data generation, a $\beta$-Variational Autoencoder ($\beta$-VAE, $\beta = 0.5$) for nonlinear dimensionality reduction, a Federated Gated Recurrent Unit (FedGRU) network for distributed privacy-preserving load forecasting, a Hierarchical Stackelberg Game for demand-responsive dynamic pricing, a Differential Evolution (DE/rand/1/bin) optimizer with an eight-term multi-objective fitness function for constrained appliance scheduling, and an interactive visualization dashboard. The framework operates end-to-end on raw IoT data without exposing individual consumption records, enforcing data locality through the FedAvg protocol across 50 distributed smart home clients.
+
+Experimental evaluation on a synthetic dataset of 144,000 records spanning 50 homes over 30 days demonstrates that the proposed framework achieves a 46.2\% daily energy cost reduction (from 1308\,INR to 704\,INR), a 23.0\% peak load reduction, and robust forecasting accuracy with a Mean Absolute Error of 1.846\,kW and Root Mean Square Error of 2.502\,kW after 20 federated communication rounds. Comparative analysis against three recent IEEE baselines confirms balanced superiority across all evaluation dimensions.
+\end{abstract}
+
+% ============================================================
+%                     INDEX TERMS
+% ============================================================
+\begin{IEEEkeywords}
+Federated Learning, Smart Home Energy Management, Variational Autoencoder, Stackelberg Game, Differential Evolution, Privacy-Preserving IoT
+\end{IEEEkeywords}
+
 \IEEEpeerreviewmaketitle
 
 % ############################################################
@@ -658,11 +676,11 @@ The proposed hybrid intelligent energy optimization framework is evaluated again
 % ============================================================
 \section{Conclusion}
 
-This paper presented a privacy-preserving hybrid intelligent framework for smart home energy optimization that integrates six complementary modules: a Digital Twin Simulator for realistic data generation, a $\beta$-VAE for nonlinear dimensionality reduction, a Federated GRU network for privacy-preserving load forecasting, a Hierarchical Stackelberg Game for dynamic pricing, a Differential Evolution optimizer for constrained multi-objective schedule optimization, and an interactive visualization dashboard.
+This paper presented a comprehensive, privacy-preserving hybrid intelligent framework designed to address the multifaceted challenges of smart home energy optimization. The proposed architecture systematically integrates six complementary modules to achieve its objectives: a Digital Twin Simulator that generates high-fidelity synthetic IoT energy data; a $\beta$-Variational Autoencoder ($\beta$-VAE) that performs nonlinear dimensionality reduction to extract robust latent behavioral features while mitigating data noise; a Federated Gated Recurrent Unit (FedGRU) network that executes distributed, privacy-preserving load forecasting without centralizing sensitive consumer data; a Hierarchical Stackelberg Game formulation that computes dynamic, demand-responsive electricity prices to establish economic equilibrium between grid operators and consumers; a Differential Evolution optimizer employing a sophisticated eight-term multi-objective fitness function for constrained appliance scheduling; and an interactive visualization dashboard for seamless user engagement.
 
-Experimental evaluation on a synthetic dataset of 50 smart homes over 30 days demonstrated that the proposed framework achieves 46.2\% daily energy cost reduction (1308\,INR $\to$ 704\,INR), 23.0\% peak load reduction, and robust forecasting accuracy (MAE = 1.846\,kW, RMSE = 2.502\,kW) while preserving complete data privacy through federated learning. Comparative analysis against three recent IEEE baselines---BDIA, MADRL, and STFL---confirmed balanced superiority across all six evaluation dimensions: cost savings, comfort preservation, privacy, convergence speed, peak reduction, and forecast accuracy.
+The integration of these diverse algorithmic pillars into a cohesive pipeline yields exceptional performance. Experimental evaluation conducted on a synthetic dataset encompassing 144,000 records from 50 smart homes over a 30-day period demonstrated significant improvements over existing methods. Foremost, the proposed framework achieved a remarkable 46.2\% reduction in daily energy costs, lowering average expenses from 1308\,INR to 704\,INR. Simultaneously, the system effectively shaved peak grid loads by 23.0\%, directly contributing to macroscopic grid stability. Furthermore, the federated forecasting module attained a high degree of precision, recording a Mean Absolute Error of 1.846\,kW and a Root Mean Square Error of 2.502\,kW after 20 federated communication rounds. Comparative multi-objective analysis against recent baseline models---namely BDIA, MADRL, and STFL---confirmed our framework's balanced superiority in cost efficiency, comfort preservation, privacy guarantees, and computational convergence.
 
-The key contribution lies in the end-to-end integration of these algorithmic pillars into a unified pipeline, where VAE-compressed latent representations enable efficient federated training, Stackelberg equilibrium prices provide economically rational cost signals, and the DE optimizer produces schedules that simultaneously minimize cost, preserve comfort, and respect physical constraints. Future work will focus on full-scale hardware deployment, physical IoT sensor integration, edge-node real-time federated deployment, and large-scale real-user validation.
+Looking ahead, future work will focus on transitioning this framework from simulation to full-scale hardware deployment. This entails the direct integration of physical IoT sensors for real-time edge-node federated training, exploring advanced asynchronous federated aggregation protocols to handle straggler clients, and conducting large-scale, real-world user validation to further refine the economic and technical models in live grid environments.
 
 % ============================================================
 % ACKNOWLEDGMENT
