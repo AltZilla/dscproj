@@ -114,7 +114,7 @@ The problem of smart home energy management, demand forecasting, and privacy-pre
 
 Researchers investigating deep reinforcement learning (DRL) have actively explored algorithmic adaptations to control appliance states under real-time conditions. Notably, Li \textit{et al.} \cite{madrl2025} developed a massive multi-agent DRL framework combining Q-learning agents to handle dynamic pricing, validating their architecture via substantial cost-to-comfort improvements. Similarly, Bahrami \textit{et al.} \cite{bahrami2021deep} and Tang \textit{et al.} \cite{tang2024dynamic} introduced demand response coordination models utilizing deep reinforcement learning to coordinate dynamic competitive interactions for demand response, optimizing continuous action domains. While these DRL systems iteratively solve for comfort optimization, they generally mandate enormous, centralized experience replay buffers and lack the long-term temporal lookahead inherent in seq2seq forecasting models, often failing when operating outside their trained distributional environments. 
 
-Conversely, the necessity for robust forecasting models decoupled from privacy infringement has recently accelerated the integration of Federated Learning (FL) inside smart grids. Wang \textit{et al.} \cite{stfl2025} pioneered a spatiotemporal federated framework for privacy-preserving load forecasting, employing clustering strategies to bypass data centralization. In tandem, Alzamil \textit{et al.} \cite{alzamil2025federated} successfully validated federated deep learning for processing non-i.i.d sequential prediction tasks physically located un-aggregated at IoT endpoints. Furthermore, Wang \textit{et al.} \cite{wang2025multi-gradient-descent} proposed multi-gradient-descent collaborative learning functions, driving a parity-oriented formulation that tailored the aggregated global weights to individual consumer dynamics. Notably, Mao \textit{et al.} \cite{mao2023communication-efficient} introduced communication-efficient updates, drastically mitigating network latency during energy management epochs. Additionally, Wu \textit{et al.} \cite{wu2025privacy} engineered asynchronous protocols for edge-based energy scheduling, while Sharma \textit{et al.} \cite{sharma2024decentralized} extended these principles strictly to decentralized demand response. However, these FL frameworks overwhelmingly solve prediction challenges in pure isolation, entirely omitting necessary real-world market-responsive pricing dynamics and physically bound appliance control execution. To manage localized noise and dimensionality burdens prior to federated transmission, Fan \textit{et al.} \cite{fan2025adaptive} effectively demonstrated adaptive methods against stochastic noise injection inside real grid distributions.
+Conversely, the necessity for robust forecasting models decoupled from privacy infringement has recently accelerated the integration of Federated Learning (FL) inside smart grids. Wang \textit{et al.} \cite{stfl2025} pioneered a spatiotemporal federated framework for privacy-preserving load forecasting, employing clustering strategies to bypass data centralization. In tandem, Alzamil \textit{et al.} \cite{alzamil2025federated} successfully validated federated deep learning for processing non-i.i.d sequential prediction tasks physically located un-aggregated at IoT endpoints. Furthermore, Wang \textit{et al.} \cite{wang2025multi-gradient-descent} proposed multi-gradient-descent collaborative learning functions, driving a parity-oriented formulation that tailored the aggregated global weights to individual consumer dynamics. Notably, Mao \textit{et al.} \cite{mao2023communication-efficient} introduced communication-efficient updates, drastically mitigating network latency during energy management epochs. Additionally, Wu \textit{et al.} \cite{wu2025privacy} engineered asynchronous protocols for edge-based energy scheduling, while Zhang \textit{et al.} \cite{zhang2026parallel} extended these principles strictly to decentralized demand response via federated transfer reinforcement learning. However, these FL frameworks overwhelmingly solve prediction challenges in pure isolation, entirely omitting necessary real-world market-responsive pricing dynamics and physically bound appliance control execution. To manage localized noise and dimensionality burdens prior to federated transmission, Fan \textit{et al.} \cite{fan2025adaptive} effectively demonstrated adaptive methods against stochastic noise injection inside real grid distributions.
 
 In parallel with learning-oriented methods, game-theoretic economic models and metaheuristic operations have been optimized to regulate electricity markets and combinatorial scheduling. Aguiar \textit{et al.} \cite{aguiar2021network-constrained} addressed non-cooperative supply-demand alignment utilizing a Stackelberg game approach, successfully limiting macroscopic grid peak fluctuations. Dong \textit{et al.} \cite{dong2020energy} subsequently bridged game theory with consumer management by optimizing Nash equilibrium states against cost using hierarchical strategies. Additionally, optimization systems like the Big Data-Intelligence Analytics (BDIA) framework by Zheng \textit{et al.} \cite{bdia2025} mapped IoT appliance behavior against static pricing models using massive computational analytics. To manage complex constraint bounds in load scheduling, Zhang \textit{et al.} \cite{zhang2025aggregator-grid} applied adaptive algorithms respectively to penalize infeasible load curves and optimize combinatorial tasks precisely. Decentralized structures leveraging blockchain layers have also emerged, with Danish \textit{et al.} \cite{danish2025block-fedl:} verifying distributed smart home control ledgers that resist tampering.
 
@@ -731,10 +731,10 @@ The authors would like to thank Vellore Institute of Technology, Chennai, for pr
 Pecan Street Inc., ``Dataport: The world's largest energy data gathering network,'' \textit{Pecan Street Inc.}, Austin, TX, USA, 2023. [Online]. Available: \url{https://www.pecanstreet.org/dataport/}
 
 \bibitem{wu2025privacy}
-Kim, Oh, Noh et al., ``Energy-Efficient Online Federated Learning in Wireless Networks,'' \textit{IEEE Transactions on Vehicular Technology}, 2026.
+Kim, Oh, Noh et al., ``Energy-Efficient Online Federated Learning in Wireless Networks,'' \textit{IEEE Transactions on Vehicular Technology}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11421057}
 
-\bibitem{sharma2024decentralized}
-D. Sharma, A. Kumar, and M. Singh, ``Decentralized Demand Response Using Federated Reinforcement Learning in Smart Homes,'' \textit{IEEE Transactions on Consumer Electronics}, 2024.
+\bibitem{zhang2026parallel}
+Y. Zhang, Z. Mei, H. Jiang, Y. Xue, W.-N. Chen, J. Zhang, and W. Gao, ``A Parallel PPO-Based Federated Transfer Reinforcement Learning Method for Multiple Home Energy Management via Cross-Domain Adaption,'' \textit{IEEE Transactions on Industrial Informatics}, Vol. 22, No. 3, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11314642/}
 
 \bibitem{bdia2025}
 Y. Zheng \textit{et al.}, ``Big data-intelligence analytics for energy optimization in IoT-enabled smart home devices,'' \textit{IEEE Transactions on Industrial Informatics}, 2025. [Online]. Available: \url{https://ieeexplore.ieee.org/document/10980008}
@@ -746,61 +746,61 @@ X. Li \textit{et al.}, ``Multiagent DRL-based demand response optimization for I
 Yang, Wang, Cui et al., ``Energy-Efficient Federated Learning in Mobile Edge Computing via Fine-grained Energy Planning Client Selection,'' \textit{IEEE Transactions on Mobile Computing}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11189875}
 
 \bibitem{alfaverh2020demand}
-Wu, Li, Guo et al., ``A Weight-Allocation and Privacy-Preserving Federated Learning Approach for the BTM PV Power Forecasting,'' \textit{IEEE Transactions on Sustainable Energy}, 2026.
+Wu, Li, Guo et al., ``A Weight-Allocation and Privacy-Preserving Federated Learning Approach for the BTM PV Power Forecasting,'' \textit{IEEE Transactions on Sustainable Energy}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11361284}
 
 \bibitem{dong2020energy}
-Fu, Ku, Singh et al., ``Energy-Efficient User Grouping-Based Federated Learning with UAV Assistance,'' \textit{IEEE Transactions on Green Communications and Networking}, 2026.
+Fu, Ku, Singh et al., ``Energy-Efficient User Grouping-Based Federated Learning with UAV Assistance,'' \textit{IEEE Transactions on Green Communications and Networking}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11454597}
 
 \bibitem{alzamil2025federated}
-Charatsaris, Voikos, Diamanti et al., ``Latency and Energy Minimization in RIS-enabled AirComp Federated Learning Networks,'' \textit{IEEE Transactions on Vehicular Technology}, 2026.
+Charatsaris, Voikos, Diamanti et al., ``Latency and Energy Minimization in RIS-enabled AirComp Federated Learning Networks,'' \textit{IEEE Transactions on Vehicular Technology}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11408148}
 
 \bibitem{wang2025multi-gradient-descent}
-Wang, Xing, Si et al., ``Multi-Gradient-Descent Federated Learning With Parity for Cooperative Short-Term Load Forecasting,'' \textit{IEEE Transactions on Power Systems}, 2025.
+Wang, Xing, Si et al., ``Multi-Gradient-Descent Federated Learning With Parity for Cooperative Short-Term Load Forecasting,'' \textit{IEEE Transactions on Power Systems}, 2025. [Online]. Available: \url{https://ieeexplore.ieee.org/document/10577590}
 
 \bibitem{aguiar2021network-constrained}
-Li, Hu, Wang et al., ``PoFEL: Energy-efficient Consensus for Blockchain-based Hierarchical Federated Learning,'' \textit{IEEE Transactions on Services Computing}, 2026.
+Li, Hu, Wang et al., ``PoFEL: Energy-efficient Consensus for Blockchain-based Hierarchical Federated Learning,'' \textit{IEEE Transactions on Services Computing}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11441987}
 
 \bibitem{zhang2025demand}
-Chavhan, Santo, Gupta et al., ``Energy-Aware Sparse Federated Learning Framework for Secure Edge Healthcare and Consumer IoMT Devices,'' \textit{IEEE Transactions on Consumer Electronics}, 2026.
+Chavhan, Santo, Gupta et al., ``Energy-Aware Sparse Federated Learning Framework for Secure Edge Healthcare and Consumer IoMT Devices,'' \textit{IEEE Transactions on Consumer Electronics}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/10530325}
 
 \bibitem{bahrami2021deep}
-Ji, Li, Lai et al., ``Redundancy Removal and Knowledge Alignment-Based Personalized Federated Learning for Online Condition Monitoring,'' \textit{IEEE Transactions on Neural Networks and Learning Systems}, 2026.
+Ji, Li, Lai et al., ``Redundancy Removal and Knowledge Alignment-Based Personalized Federated Learning for Online Condition Monitoring,'' \textit{IEEE Transactions on Neural Networks and Learning Systems}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/10534293}
 
 \bibitem{mao2023communication-efficient}
-Zhang, Xie, Hao et al., ``Optimizing Demand Response in Virtual Power Plants: A Two-Stage Game-Programming Model,'' \textit{IEEE Transactions on Engineering Management}, 2026.
+Zhang, Xie, Hao et al., ``Optimizing Demand Response in Virtual Power Plants: A Two-Stage Game-Programming Model,'' \textit{IEEE Transactions on Engineering Management}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11409455}
 
 \bibitem{huang2019demand}
-Yang, Zhu, Zou et al., ``Reconfigurable Intelligent Surface Assisted Anti-Jamming Communications: A Stackelberg Game Approach,'' \textit{IEEE Transactions on Vehicular Technology}, 2026.
+Yang, Zhu, Zou et al., ``Reconfigurable Intelligent Surface Assisted Anti-Jamming Communications: A Stackelberg Game Approach,'' \textit{IEEE Transactions on Vehicular Technology}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11342421}
 
 \bibitem{danish2025block-fedl:}
-Danish, Hameed, Ranjha et al., ``Block-FeDL: Electric Vehicle Charging Load Forecasting Using Federated Learning and Blockchain,'' \textit{IEEE Transactions on Vehicular Technology}, 2025.
+Danish, Hameed, Ranjha et al., ``Block-FeDL: Electric Vehicle Charging Load Forecasting Using Federated Learning and Blockchain,'' \textit{IEEE Transactions on Vehicular Technology}, 2025. [Online]. Available: \url{https://ieeexplore.ieee.org/document/10542566}
 
 \bibitem{liu2022federated}
-Zhou, Guo, Yu et al., ``Three-Stage Stackelberg Game-Based Federated Learning With Wireless Power Transfer,'' \textit{IEEE Transactions on Networking}, 2026.
+Zhou, Guo, Yu et al., ``Three-Stage Stackelberg Game-Based Federated Learning With Wireless Power Transfer,'' \textit{IEEE Transactions on Networking}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/10555306}
 
 \bibitem{wang2024blockchain-based}
-Wang, Dong et al., ``Blockchain-Based Clustered Federated Learning for Non-Intrusive Load Monitoring,'' \textit{IEEE Transactions on Smart Grid}, 2024.
+Wang, Dong et al., ``Blockchain-Based Clustered Federated Learning for Non-Intrusive Load Monitoring,'' \textit{IEEE Transactions on Smart Grid}, 2024. [Online]. Available: \url{https://ieeexplore.ieee.org/document/10326194}
 
 \bibitem{zhang2025aggregator-grid}
-Zhang, Li et al., ``Aggregator-Grid Interactive Building Dual-Layer Price-Responsive Demand Response Scheduling Based on Federated Deep Reinforcement Learning,'' \textit{IEEE Transactions on Smart Grid}, 2025.
+Zhang, Li et al., ``Aggregator-Grid Interactive Building Dual-Layer Price-Responsive Demand Response Scheduling Based on Federated Deep Reinforcement Learning,'' \textit{IEEE Transactions on Smart Grid}, 2025. [Online]. Available: \url{https://ieeexplore.ieee.org/document/10603704}
 
 \bibitem{rahman2025electrical}
-Tang, Ma, Li et al., ``Active RIS-Aided Anti-Jamming Wireless Communications: A Stackelberg Game Perspective,'' \textit{IEEE Transactions on Communications}, 2026.
+Tang, Ma, Li et al., ``Active RIS-Aided Anti-Jamming Wireless Communications: A Stackelberg Game Perspective,'' \textit{IEEE Transactions on Communications}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11310794}
 
 \bibitem{zhang2025adaptive}
-Zhang, Peng, Li et al., ``Adaptive Asynchronous Federated Learning for Digital Twin Driven Smart Grid,'' \textit{IEEE Transactions on Smart Grid}, 2025.
+Zhang, Peng, Li et al., ``Adaptive Asynchronous Federated Learning for Digital Twin Driven Smart Grid,'' \textit{IEEE Transactions on Smart Grid}, 2025. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11036541}
 
 \bibitem{balint2023using}
-Sheng, Xu, Xie et al., ``Risk-Aware Prediction-Optimization Integrated Method for Day-ahead Microgrid Operation,'' \textit{IEEE Transactions on Smart Grid}, 2026.
+Sheng, Xu, Xie et al., ``Risk-Aware Prediction-Optimization Integrated Method for Day-ahead Microgrid Operation,'' \textit{IEEE Transactions on Smart Grid}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11422273}
 
 \bibitem{lee2018light-weight}
-Ommani, Delkhosh, Seifi et al., ``Optimization-Based Data Recovery After False Data Injection Attacks on State Estimators Using Measurements Inertia and Calibrated Predictions,'' \textit{IEEE Transactions on Smart Grid}, 2026.
+Ommani, Delkhosh, Seifi et al., ``Optimization-Based Data Recovery After False Data Injection Attacks on State Estimators Using Measurements Inertia and Calibrated Predictions,'' \textit{IEEE Transactions on Smart Grid}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11318976}
 
 \bibitem{tang2024dynamic}
-Guillen, Milanovi\u0107 et al., ``Machine Learning-Based Long-Term Forecasting of Load Composition Considering Exogenous Variables,'' \textit{IEEE Transactions on Smart Grid}, 2026.
+Guillen, Milanovi\u0107 et al., ``Machine Learning-Based Long-Term Forecasting of Load Composition Considering Exogenous Variables,'' \textit{IEEE Transactions on Smart Grid}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11371413}
 
 \bibitem{fan2025adaptive}
-Fan, Zhao, Yue et al., ``Adaptive Privacy Preserving Federated Learning for Virtual Power Plant Cyberattack Detection,'' \textit{IEEE Transactions on Smart Grid}, 2025.
+Fan, Zhao, Yue et al., ``Adaptive Privacy Preserving Federated Learning for Virtual Power Plant Cyberattack Detection,'' \textit{IEEE Transactions on Smart Grid}, 2025. [Online]. Available: \url{https://ieeexplore.ieee.org/document/10756770}
 
 \end{thebibliography}
 
