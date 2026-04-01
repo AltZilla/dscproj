@@ -94,12 +94,14 @@ To resolve this severe dichotomy, advanced privacy-preserving algorithms and com
 In this paper, we propose a comprehensive hybrid intelligent system engineered to jointly optimize privacy-preserving load forecasting and discrete energy scheduling within IoT-enabled smart homes. The framework securely forecasts residential demand via a Federated Gated Recurrent Unit (FedGRU) network operating strictly on compressed $\beta$-Variational Autoencoder ($\beta$-VAE) latent representations, neutralizing data leakage risks at the edge. The securely aggregated load predictions subsequently drive a Hierarchical Stackelberg pricing game, establishing an equilibrium that balances grid capacity with consumer utility. Finally, a specialized Differential Evolution (DE) optimizer evaluates candidate appliance schedules against an intricate multi-objective fitness function to generate mathematically constrained, cost-effective activation plans.
 
 The specific unique contributions of this work are highlighted as follows:
-\begin{itemize}
-    \item We formulate an interconnected pipeline where $\beta$-VAE non-linear dimensionality reduction and Federated GRU algorithms are pipelined, enabling accurate time-series forecasting while strictly bounding the communication payload and guaranteeing absolute raw data privacy across remote IoT nodes.
-    \item We design a dynamic Hierarchical Stackelberg game tightly integrated with federated forecasting outputs, creating a closed-loop demand response market model that dynamically computes equilibrium electricity pricing.
-    \item We introduce a highly constrained multi-objective Differential Evolution (DE/rand/1/bin) optimizer evaluating an eight-term custom fitness function to simultaneously execute exact peak-shaving, thermal comfort preservation, and physical constraint adherence.
-    \item We develop a high-fidelity Digital Twin Simulator simulating stochastic Markov-based human occupancy and complex thermal dynamics, explicitly tailored to generate massive, realistic datasets to robustly benchmark the proposed joint-optimization workflow.
-\end{itemize}
+
+We formulate an interconnected pipeline where $\beta$-VAE non-linear dimensionality reduction and Federated GRU algorithms are pipelined, enabling accurate time-series forecasting while strictly bounding the communication payload and guaranteeing absolute raw data privacy across remote IoT nodes.
+
+We design a dynamic Hierarchical Stackelberg game tightly integrated with federated forecasting outputs, creating a closed-loop demand response market model that dynamically computes equilibrium electricity pricing.
+
+We introduce a highly constrained multi-objective Differential Evolution (DE/rand/1/bin) optimizer evaluating an eight-term custom fitness function to simultaneously execute exact peak-shaving, thermal comfort preservation, and physical constraint adherence.
+
+We develop a high-fidelity Digital Twin Simulator simulating stochastic Markov-based human occupancy and complex thermal dynamics, explicitly tailored to generate massive, realistic datasets to robustly benchmark the proposed joint-optimization workflow.
 
 The remainder of this paper is structured as follows: Section II provides a comprehensive review of related works and delineates the existing research gaps. Section III presents an overview of the proposed system architecture. Section IV rigorously details the mathematical formulations and implementations of the six core system modules. Section V discusses the dataset, experimental validation, and quantitative comparative analysis. Finally, Section VI concludes the paper and outlines future research trajectories.
 
@@ -702,12 +704,6 @@ Fig.~\ref{fig:radar} presents a radar chart comparing the four frameworks across
     \mathcal{S} = \frac{1}{M}\sum_{m=1}^{M} s_m, \quad A = \frac{1}{2}\sum_{m=1}^{M} s_m \cdot s_{m+1} \cdot \sin\left(\frac{2\pi}{M}\right)
 \end{equation}
 where $M = 6$ is the total number of evaluation dimensions, $s_m \in [0,1]$ is the MinMax normalized performance score on the $m$-th evaluation dimension, and $s_{M+1} \equiv s_1$ to ensure cyclic polygon closure. Area $A$ naturally rewards models that perform consistently well across all metrics, penalizing those with high variance. The BDIA approach scores poorly on Privacy due to its centralized learning. MADRL achieves strong Comfort through reward shaping but sacrifices Convergence Speed. STFL achieves good Privacy through federated design but lacks game-theoretic pricing and evolutionary optimization. The proposed framework's balanced superiority validates the complementary integration of all four algorithmic pillars: VAE (representation), FedGRU (privacy-preserving forecasting), Stackelberg (optimal pricing), and DE (constrained schedule optimization).
-
-% ────────────────────────────────────────────────────────
-\subsection{Comparative Performance Analysis}
-% ────────────────────────────────────────────────────────
-
-The proposed hybrid intelligent energy optimization framework is evaluated against three recent IEEE Transactions baselines: BDIA (Big Data-Intelligence Analytics for Energy Optimization~\cite{bdia2025}), MADRL (Multi-Agent DRL-Based Demand Response~\cite{madrl2025}), and STFL (Spatiotemporal Federated Learning for Privacy-Preserving Load Forecasting~\cite{stfl2025}).
 
 % ============================================================
 % CONCLUSION
