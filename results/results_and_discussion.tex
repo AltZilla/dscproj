@@ -65,16 +65,16 @@
 \begin{abstract}
 The growth of Internet-of-Things (IoT) devices enables real-time energy management, but accurate load forecasting and appliance scheduling remain constrained by the conflict between data privacy and forecasting precision. Centralized learning risks exposing sensitive consumer behavioral data, while decentralized methods often sacrifice accuracy and lack cost signals. Existing solutions, such as static Time-of-Use pricing and independent reinforcement learning agents, address these challenges in isolation, failing to jointly optimize privacy, forecast accuracy, grid stability, and user comfort under a unified architecture.
 
-This paper presents a six-stage hybrid intelligent framework integrating a Digital Twin Simulator, a $\beta$-Variational Autoencoder ($\beta$-VAE) for dimensionality reduction, and a Federated Gated Recurrent Unit (FedGRU) network for distributed privacy-preserving load forecasting. This is coupled with a Hierarchical Stackelberg Game for dynamic pricing and a Differential Evolution (DE) optimizer for multi-objective appliance scheduling. The framework operates end-to-end on raw IoT data, effectively enforcing strict data locality through the FedAvg protocol across 50 smart home clients to guarantee absolute raw data privacy throughout the optimization lifecycle.
+This paper presents a six-stage hybrid intelligent framework integrating a digital twin simulator, a $\beta$-variational autoencoder ($\beta$-VAE) for dimensionality reduction, and a federated gated recurrent unit (FedGRU) network for distributed privacy-preserving load forecasting. This is coupled with a hierarchical Stackelberg game for dynamic pricing and a differential evolution (DE) optimizer for multi-objective appliance scheduling. The framework operates end-to-end on raw IoT data, effectively enforcing strict data locality through the FedAvg protocol across 50 smart home clients to guarantee absolute raw data privacy throughout the optimization lifecycle.
 
-Experimental evaluation (144,000 records spanning 50 homes over 30 days) shows that the proposed framework reduces energy costs by 46.2\% and peak loads by 23.0\%. It maintains robust forecasting accuracy with a Mean Absolute Error of 1.846\,kW and a Root Mean Square Error of 2.502\,kW after 20 federated rounds, demonstrating superior precision and convergence stability. Comparative analysis against three recent IEEE baselines—BDIA, MADRL, and STFL—confirms its balanced superiority in simultaneously optimizing cost efficiency, grid stability, and consumer privacy within an integrated and secure optimization pipeline.
+Experimental evaluation (144,000 records spanning 50 homes over 30 days) shows that the proposed framework reduces energy costs by 46.2\% and peak loads by 23.0\%. It maintains robust forecasting accuracy with a mean absolute error of 1.846\,kW and a root mean square error of 2.502\,kW after 20 federated rounds, demonstrating superior precision and convergence stability. Comparative analysis against three recent IEEE baselines—BDIA, MADRL, and STFL—confirms its balanced superiority in simultaneously optimizing cost efficiency, grid stability, and consumer privacy within an integrated and secure optimization pipeline.
 \end{abstract}
 
 % ============================================================
 %                     INDEX TERMS
 % ============================================================
 \begin{IEEEkeywords}
-Federated Learning, Smart Home Energy Management, Variational Autoencoder, Stackelberg Game, Differential Evolution, Privacy-Preserving IoT
+federated learning, smart home energy management, variational autoencoder, Stackelberg game, differential evolution, privacy-preserving IoT
 \end{IEEEkeywords}
 
 \IEEEpeerreviewmaketitle
@@ -102,7 +102,7 @@ We develop a novel end-to-end pipeline, which involves $\beta$-VAE dimensionalit
 
 - We apply a severely restricted multi-objective differential evolution (DE) optimizer (DE/rand/1/bin) that assesses a customized fitness function consisting of eight criteria to accomplish simultaneous peak shaving, thermal comfort maintenance, and constraint satisfaction.
 
-- We build a sophisticated Digital Twin Simulator, capable of modeling stochastic Markov-based occupant dynamics and complicated thermal behavior, specifically intended for simulating a massive amount of synthetic data to test the joint optimization framework.
+- We build a sophisticated digital twin simulator, capable of modeling stochastic Markov-based occupant dynamics and complicated thermal behavior, specifically intended for simulating a massive amount of synthetic data to test the joint optimization framework.
 
 The rest of this paper is organized as follows: Related work and open challenges in existing literature are reviewed in Section II. Section III gives a brief description of the proposed system architecture. In Section IV, we provide detailed mathematical derivations and implementations of six key components. Section V describes our simulation setup, including datasets, validation experiments, and comparative analysis. Finally, concluding remarks are made in Section VI.
 
@@ -128,9 +128,9 @@ Despite the advances made within each of these different areas, there exists a s
 
 \subsection{Overview}
 
-The proposed framework addresses three fundamental challenges in smart home energy management: (1) accurate load forecasting under data privacy constraints, (2) economically rational dynamic pricing in multi-user networks, and (3) multi-objective appliance schedule optimization under physical constraints. To tackle these challenges simultaneously, we present a six-stage hybrid intelligent system that integrates a Digital Twin Simulator for synthetic data generation, a $\beta$-VAE for latent feature extraction, a FedGRU network for privacy-preserving load forecasting, a Hierarchical Stackelberg Game for dynamic electricity pricing, a DE optimizer for constrained schedule optimization, and an interactive visualization dashboard.
+The proposed framework addresses three fundamental challenges in smart home energy management: (1) accurate load forecasting under data privacy constraints, (2) economically rational dynamic pricing in multi-user networks, and (3) multi-objective appliance schedule optimization under physical constraints. To tackle these challenges simultaneously, we present a six-stage hybrid intelligent system that integrates a digital twin simulator for synthetic data generation, a $\beta$-VAE for latent feature extraction, a FedGRU network for privacy-preserving load forecasting, a hierarchical Stackelberg game for dynamic electricity pricing, a DE optimizer for constrained schedule optimization, and an interactive visualization dashboard.
 
-The key contribution of the pipeline is its seamless integration, which allows for the modules to work in sequence in a manner such that the outputs of a module are directly fed to the next module in deterministic fashion. In other words, first, the Digital Twin is responsible for producing realistic training data; second, the $\beta$-VAE is used to encode high dimensional sensor information to compact latent representation; third, FedGRU learns to forecast future demand based on the compressed representation of IoT data, without using any actual user data; fourth, the output of FedGRU is then used by the Stackelberg game to determine the best price; and finally, the DE optimization algorithm uses the determined price to define the cost signals in the multi-objective fitness function and optimize appliance schedules so that the generated schedules minimize costs while maintaining user comfort, minimizing peak load and satisfying physical constraints.
+The key contribution of the pipeline is its seamless integration, which allows for the modules to work in sequence in a manner such that the outputs of a module are directly fed to the next module in deterministic fashion. In other words, first, the digital twin is responsible for producing realistic training data; second, the $\beta$-VAE is used to encode high dimensional sensor information to compact latent representation; third, FedGRU learns to forecast future demand based on the compressed representation of IoT data, without using any actual user data; fourth, the output of FedGRU is then used by the Stackelberg game to determine the best price; and finally, the DE optimization algorithm uses the determined price to define the cost signals in the multi-objective fitness function and optimize appliance schedules so that the generated schedules minimize costs while maintaining user comfort, minimizing peak load and satisfying physical constraints.
 
 \begin{figure*}[t]
 \centering
@@ -146,7 +146,7 @@ The key contribution of the pipeline is its seamless integration, which allows f
 \section{Detailed Proposed System}
 
 % ────────────────────────────────────────────────────────
-\subsection{Digital Twin Simulator}
+\subsection{digital twin simulator}
 
 \subsubsection{Occupancy Model} Occupant behavior is modeled as a 3-state discrete-time Markov chain with states $\mathcal{S} = \{s_0 = \text{Home}, s_1 = \text{Away}, s_2 = \text{Sleeping}\}$. The occupancy state at time $t$ evolves according to:
 \begin{equation}
@@ -176,7 +176,7 @@ where $\alpha$ is the thermal decay rate, $\eta$ is the HVAC cooling rate per sl
 \end{equation}
 where $p_a^{\text{base}}(h)$ is the base hourly schedule, $\gamma_{\text{occ}}$ are state-dependent modulation factors for Away/Sleeping/Home states, $\gamma_{\text{env}}$ is the temperature-responsive factor for HVAC, and $\xi_{\text{home}}$ introduces per-home behavioral variation sampled from a uniform distribution.
 
-\subsubsection{Time-of-Use Pricing} The electricity pricing assumes a representative three-tier TOU structure as a baseline example:
+\subsubsection{Time-of-Use pricing} The electricity pricing assumes a representative three-tier TOU structure as a baseline example:
 \begin{equation}
     p(h) = \begin{cases}
         2.0 \; \text{INR/kWh} & h \in [0, 5] \; \text{(Off-Peak)} \\
@@ -216,7 +216,7 @@ where $x_i$ is the original feature value, $\hat{x}_i$ is the normalized value, 
 After preprocessing, the feature vector has dimensionality $d = 19$ per record, comprising 7 appliance power readings, 3 environmental variables, 2 cyclical time encodings, and 7 contextual features (price, occupancy, weekend flag, rolling statistics, lag features).
 
 % ────────────────────────────────────────────────────────
-\subsection{$\beta$-Variational Autoencoder ($\beta$-VAE)}
+\subsection{$\beta$-variational autoencoder ($\beta$-VAE)}
 
 The $\beta$-VAE performs nonlinear dimensionality reduction from $d = 19$ raw features to a compact $d_z = 16$-dimensional latent space, capturing essential behavioral patterns while filtering noise.
 
@@ -304,7 +304,7 @@ where $\kappa$ is the condition number of the loss landscape, $\mu$ is the stron
 
 
 % ────────────────────────────────────────────────────────
-\subsection{Hierarchical Stackelberg Game Pricing}
+\subsection{hierarchical Stackelberg game pricing}
 
 The dynamic pricing mechanism is formulated as a single-leader multi-follower Stackelberg game between the grid operator (leader) and $N = 50$ smart home users (followers).
 
@@ -344,7 +344,7 @@ where $\Pi$ is the leader's profit, $p^*$ is the Stackelberg equilibrium price, 
 where $p_h^{\text{SG}}$ is the Stackelberg equilibrium price at hour $h$, and $\Pi_h(p)$ is the leader's profit function at hour $h$ computed using the hourly demand profile derived from the GRU forecaster.
 
 % ────────────────────────────────────────────────────────
-\subsection{Differential Evolution (DE) Schedule Optimization}
+\subsection{differential evolution (DE) Schedule Optimization}
 
 The DE module optimizes binary appliance schedules $\mathbf{S} \in \{0,1\}^{A \times T}$ where $A$ is the total number of appliances and $T$ is the number of time slots, using the DE/rand/1/bin strategy.
 
@@ -484,7 +484,7 @@ All experiments were conducted on a machine with an Intel Core i7 processor, NVI
 \subsection{Tools and Frameworks Used}
 % ────────────────────────────────────────────────────────
 
-The implementation leverages PyTorch 2.0+ with CUDA acceleration for deep learning (VAE and GRU architectures), Pandas 2.0+, NumPy 1.24+, and scikit-learn 1.3+ for data processing, a custom Differential Evolution implementation alongside SciPy 1.10+ for optimization, Plotly 5.15+, Dash 2.14+, and Matplotlib 3.7+ for visualization, PyYAML 6.0+ for configuration management, and Plotly Dash with dash-bootstrap-components for the interactive dashboard.
+The implementation leverages PyTorch 2.0+ with CUDA acceleration for deep learning (VAE and GRU architectures), Pandas 2.0+, NumPy 1.24+, and scikit-learn 1.3+ for data processing, a custom differential evolution implementation alongside SciPy 1.10+ for optimization, Plotly 5.15+, Dash 2.14+, and Matplotlib 3.7+ for visualization, PyYAML 6.0+ for configuration management, and Plotly Dash with dash-bootstrap-components for the interactive dashboard.
 
 
 % ================================================================
@@ -535,7 +535,7 @@ where $q_\phi(z|x)$ is the learned approximate posterior parameterized by $\phi$
 \label{fig:fedgru_mae}
 \end{figure}
 
-Fig.~\ref{fig:fedgru_mae} demonstrates the convergence of the Mean Absolute Error (MAE) across 20 federated communication rounds. The proposed FedGRU model, operating on 16-dimensional VAE latent features, achieves a final MAE of $1.846$\,kW after 20 rounds. The validation MSE decreases from $18.19$ (round 1) to $6.55$ (round 15), demonstrating consistent convergence. The convergence follows the FedAvg aggregation rule (Eq.~\eqref{eq:fedavg}). The convergence is attributed to the VAE's dimensionality reduction from 19 raw features to 16 latent dimensions, which effectively reduces the variance of local gradient estimates $\text{Var}[\nabla_k \mathcal{L}]$ across heterogeneous clients. Since each client trains on compact latent representations rather than noisy raw IoT signals, the inter-client gradient divergence is suppressed. Formally, bounded non-i.i.d. divergence ensures:
+Fig.~\ref{fig:fedgru_mae} demonstrates the convergence of the mean absolute error (MAE) across 20 federated communication rounds. The proposed FedGRU model, operating on 16-dimensional VAE latent features, achieves a final MAE of $1.846$\,kW after 20 rounds. The validation MSE decreases from $18.19$ (round 1) to $6.55$ (round 15), demonstrating consistent convergence. The convergence follows the FedAvg aggregation rule (Eq.~\eqref{eq:fedavg}). The convergence is attributed to the VAE's dimensionality reduction from 19 raw features to 16 latent dimensions, which effectively reduces the variance of local gradient estimates $\text{Var}[\nabla_k \mathcal{L}]$ across heterogeneous clients. Since each client trains on compact latent representations rather than noisy raw IoT signals, the inter-client gradient divergence is suppressed. Formally, bounded non-i.i.d. divergence ensures:
 \begin{equation}
     \mathbb{E} \left[ \|\nabla \mathcal{L}_k - \nabla \mathcal{L}_{\text{global}}\|^2 \right] \leq G^2 \cdot \varpi
 \end{equation}
@@ -553,7 +553,7 @@ where $\nabla \mathcal{L}_k$ is the gradient of client $k$'s local loss, $\nabla
 \label{fig:fl_rmse}
 \end{figure}
 
-Fig.~\ref{fig:fl_rmse} compares the Root Mean Square Error convergence of four federated strategies. The proposed FedAvg-GRU achieves RMSE $= 2.502$\,kW. The RMSE is computed as per Eq.~\eqref{eq:mae_rmse}. The FedAvg protocol's advantage over FedSGD stems from the multiple local epochs ($E = 5$) per communication round, which enables each client to perform more gradient steps on its local data before aggregation. With sequence length $L = 16$ (4 hours at 15-minute resolution), the GRU captures medium-term temporal dependencies in the latent space. The convergence gap between FedAvg and centralized training quantifies the ``price of privacy'' the marginal performance sacrifice in exchange for complete data locality. This gap diminishes with communication rounds $R$, bounded by the convergence rate:
+Fig.~\ref{fig:fl_rmse} compares the root mean square error convergence of four federated strategies. The proposed FedAvg-GRU achieves RMSE $= 2.502$\,kW. The RMSE is computed as per Eq.~\eqref{eq:mae_rmse}. The FedAvg protocol's advantage over FedSGD stems from the multiple local epochs ($E = 5$) per communication round, which enables each client to perform more gradient steps on its local data before aggregation. With sequence length $L = 16$ (4 hours at 15-minute resolution), the GRU captures medium-term temporal dependencies in the latent space. The convergence gap between FedAvg and centralized training quantifies the ``price of privacy'' the marginal performance sacrifice in exchange for complete data locality. This gap diminishes with communication rounds $R$, bounded by the convergence rate:
 \begin{equation}
     \Delta(R) \propto \mathcal{O}\left(\frac{1}{\sqrt{R}}\right) \implies \text{RMSE}_{\text{FedAvg}} - \text{RMSE}_{\text{Central}} \sim \frac{c}{\sqrt{R}}
 \end{equation}
@@ -571,7 +571,7 @@ where $\Delta(R)$ is the performance gap between federated and centralized model
 \label{fig:privacy_tradeoff}
 \end{figure}
 
-Fig.~\ref{fig:privacy_tradeoff} analyzes the Mean Absolute Percentage Error as a function of client participation fraction $\rho \in [0.1, 1.0]$. The proposed FedGRU achieves MAPE $= 60.97\%$ at the default $\rho = 0.4$ (20 out of 50 homes). It can be seen that MAPE is relatively large due to very small consumption levels present in the truth data, while MAE still holds practical significance (1.846 kW). The decrease in MAPE appears to experience diminishing returns, and the relationship follows an exponential decay model:
+Fig.~\ref{fig:privacy_tradeoff} analyzes the mean absolute percentage error as a function of client participation fraction $\rho \in [0.1, 1.0]$. The proposed FedGRU achieves MAPE $= 60.97\%$ at the default $\rho = 0.4$ (20 out of 50 homes). It can be seen that MAPE is relatively large due to very small consumption levels present in the truth data, while MAE still holds practical significance (1.846 kW). The decrease in MAPE appears to experience diminishing returns, and the relationship follows an exponential decay model:
 \begin{equation}
     \text{MAPE}(\rho) = \text{MAPE}_{\infty} + \alpha \cdot e^{-\gamma \rho}
 \end{equation}
@@ -594,7 +594,7 @@ Fig.~\ref{fig:sg_convergence} compares the convergence behavior of four pricing 
 % ================================================================
 % GRAPH 7
 % ================================================================
-\subsection{Hourly Stackelberg Pricing vs.\ Demand Response}
+\subsection{Hourly Stackelberg pricing vs.\ demand response}
 
 \begin{figure}[!t]
 \centering
@@ -612,7 +612,7 @@ where $p_h^{\text{blend}}$ is the final blended price offered to consumers at ho
 % ================================================================
 % GRAPH 8
 % ================================================================
-\subsection{Differential Evolution Fitness Convergence}
+\subsection{differential evolution fitness convergence}
 
 \begin{figure}[!t]
 \centering
@@ -708,9 +708,9 @@ where $M = 6$ is the total number of evaluation dimensions, $s_m \in [0,1]$ is t
 % ============================================================
 \section{Conclusion}
 
-In this paper, we have proposed a novel intelligent hybrid approach that is designed to tackle all the above mentioned complexities associated with energy management of smart homes. Our approach consists of a combination of six different modules to accomplish its goals. These include Digital Twin Simulator, $\beta$-VAE, FedGRU Network, Hierarchical Stackelberg Game Model, DE Optimizer, and an Interactive Dashboard. Firstly, Digital Twin Simulator produces high-fidelity synthetic data for IoT-based energy consumption. Then, we utilize $\beta$-VAE for performing non-linear dimensionality reduction and obtaining reliable latent behavioral features while reducing the effects of noise on data. In addition, a distributed and privacy-preserving FedGRU Network is used to perform load forecasting while avoiding any form of centralized processing of consumer data.
+In this paper, we have proposed a novel intelligent hybrid approach that is designed to tackle all the above mentioned complexities associated with energy management of smart homes. Our approach consists of a combination of six different modules to accomplish its goals. These include digital twin simulator, $\beta$-VAE, FedGRU network, hierarchical Stackelberg game model, DE optimizer, and an interactive dashboard. Firstly, digital twin simulator produces high-fidelity synthetic data for IoT-based energy consumption. Then, we utilize $\beta$-VAE for performing non-linear dimensionality reduction and obtaining reliable latent behavioral features while reducing the effects of noise on data. In addition, a distributed and privacy-preserving FedGRU network is used to perform load forecasting while avoiding any form of centralized processing of consumer data.
 
-The combination of various algorithmic blocks within the pipeline leads to a significant increase in efficiency. This fact is confirmed by an experimental assessment made using a fabricated dataset that contains 144,000 records generated over 30 days of operation for 50 smart homes. The proposed approach allows observing significant achievements compared to the current techniques. For example, the framework manages to minimize daily costs by reducing average daily expenses from 1308 INR to 704 INR, which equals a 46.2\% decrease in expenditures. At the same time, the presented system is capable of minimizing the peak loads in the grid and, therefore, improving its stability on the macro-scale. Finally, the forecasting part shows a high degree of accuracy with the values of Mean Absolute Error equal to 1.846 kW and Root Mean Square Error of 2.502 kW after 20 federated learning steps.
+The combination of various algorithmic blocks within the pipeline leads to a significant increase in efficiency. This fact is confirmed by an experimental assessment made using a fabricated dataset that contains 144,000 records generated over 30 days of operation for 50 smart homes. The proposed approach allows observing significant achievements compared to the current techniques. For example, the framework manages to minimize daily costs by reducing average daily expenses from 1308 INR to 704 INR, which equals a 46.2\% decrease in expenditures. At the same time, the presented system is capable of minimizing the peak loads in the grid and, therefore, improving its stability on the macro-scale. Finally, the forecasting part shows a high degree of accuracy with the values of mean absolute error equal to 1.846 kW and root mean square error of 2.502 kW after 20 federated learning steps.
 
 For future work, the focus for subsequent research efforts will be on moving the framework beyond its current simulated status to actual hardware implementation. This entails incorporating actual physical IoT sensor inputs to facilitate live edge-node federated learning, investigating novel asynchronous federated learning algorithms to deal with straggling client nodes, and conducting large-scale user validation experiments to further optimize the economic and technical models under realistic conditions.
 
@@ -759,7 +759,7 @@ Chavhan, Santo, Gupta et al., ``Energy-Aware Sparse Federated Learning Framework
 Ji, Li, Lai et al., ``Redundancy Removal and Knowledge Alignment-Based Personalized Federated Learning for Online Condition Monitoring,'' \textit{IEEE Transactions on Neural Networks and Learning Systems}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/10534293}
 
 \bibitem{mao2023communication-efficient}
-Zhang, Xie, Hao et al., ``Optimizing Demand Response in Virtual Power Plants: A Two-Stage Game-Programming Model,'' \textit{IEEE Transactions on Engineering Management}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11409455}
+Zhang, Xie, Hao et al., ``Optimizing demand response in Virtual Power Plants: A Two-Stage Game-Programming Model,'' \textit{IEEE Transactions on Engineering Management}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11409455}
 
 \bibitem{huang2019demand}
 Yang, Zhu, Zou et al., ``Reconfigurable Intelligent Surface Assisted Anti-Jamming Communications: A Stackelberg Game Approach,'' \textit{IEEE Transactions on Vehicular Technology}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11342421}
@@ -774,13 +774,13 @@ Zhou, Guo, Yu et al., ``Three-Stage Stackelberg Game-Based Federated Learning Wi
 Wang, Dong et al., ``Blockchain-Based Clustered Federated Learning for Non-Intrusive Load Monitoring,'' \textit{IEEE Transactions on Smart Grid}, 2024. [Online]. Available: \url{https://ieeexplore.ieee.org/document/10326194}
 
 \bibitem{zhang2025aggregator-grid}
-Zhang, Li et al., ``Aggregator-Grid Interactive Building Dual-Layer Price-Responsive Demand Response Scheduling Based on Federated Deep Reinforcement Learning,'' \textit{IEEE Transactions on Smart Grid}, 2025. [Online]. Available: \url{https://ieeexplore.ieee.org/document/10603704}
+Zhang, Li et al., ``Aggregator-Grid Interactive Building Dual-Layer Price-Responsive demand response Scheduling Based on Federated Deep Reinforcement Learning,'' \textit{IEEE Transactions on Smart Grid}, 2025. [Online]. Available: \url{https://ieeexplore.ieee.org/document/10603704}
 
 \bibitem{rahman2025electrical}
 Tang, Ma, Li et al., ``Active RIS-Aided Anti-Jamming Wireless Communications: A Stackelberg Game Perspective,'' \textit{IEEE Transactions on Communications}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11310794}
 
 \bibitem{zhang2025adaptive}
-Zhang, Peng, Li et al., ``Adaptive Asynchronous Federated Learning for Digital Twin Driven Smart Grid,'' \textit{IEEE Transactions on Smart Grid}, 2025. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11036541}
+Zhang, Peng, Li et al., ``Adaptive Asynchronous Federated Learning for digital twin Driven Smart Grid,'' \textit{IEEE Transactions on Smart Grid}, 2025. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11036541}
 
 \bibitem{balint2023using}
 Sheng, Xu, Xie et al., ``Risk-Aware Prediction-Optimization Integrated Method for Day-ahead Microgrid Operation,'' \textit{IEEE Transactions on Smart Grid}, 2026. [Online]. Available: \url{https://ieeexplore.ieee.org/document/11422273}
