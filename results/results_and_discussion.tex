@@ -149,7 +149,7 @@ The key contribution of the pipeline is its seamless integration, which allows f
     P(X_{t+1} = s_j | X_t = s_i) = \mathbf{M}_\tau(i, j)
     \label{eq:markov}
 \end{equation}
-where $X_t$ is the occupancy random variable at time step $t$, $s_i$ and $s_j$ are occupancy states from $\mathcal{S}$, and $\mathbf{M}_\tau \in \mathbb{R}^{3 \times 3}$ is the time-dependent transition matrix indexed by $(i, j)$. The time period $\tau \in \{\text{night}, \text{day}, \text{evening}\}$ selects the appropriate matrix based on the current hour. The time-varying matrices capture realistic behavioral patterns with example probabilities such as: high sleep probability during night hours ($\mathbf{M}_{\text{night}}[0,2] = 0.8$), high away probability during day ($\mathbf{M}_{\text{day}}[0,1] = 0.35$), and high home probability during evening ($\mathbf{M}_{\text{evening}}[1,0] = 0.6$).
+Let $X_t$ be the random variable for occupancy at time step $t$. Let us assume $s_i$ and $s_j$ are states from the set of possible states $\mathcal{S}$. Let the matrix $\mathbf{M}_\tau \in \mathbb{R}^{3 \times 3}$ be the probability of transition at the corresponding time period, represented by index pair $(i, j)$. The variable $\tau \in \{\text{night}, \text{day}, \text{evening}\}$ determines the time period that would select the respective transition matrix based on the current hour. These dynamic matrices represent practical scenarios, some of which are as follows: there is a high probability of being asleep at night ($\mathbf{M}_{\text{night}}[0, 2] = 0.8$), being away during daytime ($\mathbf{M}_{\text{day}}[0, 1] = 0.35$), and being home in the evening ($\mathbf{M}_{\text{evening}}[1, 0] = 0.6$).
 
 \subsubsection{Thermal Environment Model} The outdoor temperature follows a sinusoidal daily cycle with stochastic perturbation:
 \begin{equation}
@@ -238,7 +238,10 @@ where $\mathbf{z} \in \mathbb{R}^{d_z}$ is the final sampled latent vector that 
 
 \subsubsection{$\beta$-VAE Loss Function} The training objective maximizes the Evidence Lower Bound (ELBO) with a controlled KL weight $\beta$:
 \begin{equation}
-    \mathcal{L}_{\beta\text{-VAE}} = \underbrace{\frac{1}{d}\sum_{i=1}^{d}(x_i - \hat{x}_i)^2}_{\mathcal{L}_{\text{recon}}} + \beta \cdot \underbrace{\left(-\frac{1}{2}\sum_{j=1}^{d_z}\left(1 + \log\sigma_j^2 - \mu_j^2 - \sigma_j^2\right)\right)}_{D_{KL}(q_\phi(z|x) \| p(z))}
+\begin{aligned}
+    \mathcal{L}_{\beta\text{-VAE}} = & \underbrace{\frac{1}{d}\sum_{i=1}^{d}(x_i - \hat{x}_i)^2}_{\mathcal{L}_{\text{recon}}} \\
+    & + \beta \cdot \underbrace{\left(-\frac{1}{2}\sum_{j=1}^{d_z}\left(1 + \log\sigma_j^2 - \mu_j^2 - \sigma_j^2\right)\right)}_{D_{KL}(q_\phi(z|x) \| p(z))}
+\end{aligned}
     \label{eq:vae_loss}
 \end{equation}
 where $\mathcal{L}_{\beta\text{-VAE}}$ is the total loss, $d = 19$ is the input feature dimension, $x_i$ and $\hat{x}_i$ are the $i$-th original and reconstructed feature values, $\mathcal{L}_{\text{recon}}$ is the mean squared reconstruction error, $\beta$ is the KL divergence weight, $d_z$ is the latent dimension, $\mu_j$ and $\sigma_j^2$ are the mean and variance of the $j$-th latent dimension output by the encoder, $q_\phi(z|x)$ is the learned approximate posterior, and $p(z) = \mathcal{N}(\mathbf{0}, \mathbf{I})$ is the standard Gaussian prior.
@@ -488,7 +491,7 @@ The implementation leverages PyTorch 2.0+ with CUDA acceleration for deep learni
 % ================================================================
 \subsection{VAE Reconstruction Loss Convergence}
 
-\begin{figure}[!t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig01_vae_recon_loss.pdf}
 \caption{Comparative VAE loss convergence across representation learning frameworks. The proposed $\beta$-VAE ($\beta=0.5$) achieves a final training loss of $0.0947$ and validation loss of $0.0886$, outperforming BDIA-VAE and standard autoencoder baselines.}
@@ -506,7 +509,7 @@ where $\mathcal{L}_{\text{recon}}$ is the reconstruction loss, $D_{KL}$ is the K
 % ================================================================
 \subsection{Latent Space KL Divergence Analysis}
 
-\begin{figure}[!t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig02_kl_divergence.pdf}
 \caption{KL divergence convergence during VAE training. The proposed $\beta$-VAE stabilizes at $D_{KL} \approx 0.0386$, achieving better latent space regularization than both BDIA-VAE and vanilla VAE variants.}
@@ -524,7 +527,7 @@ where $q_\phi(z|x)$ is the learned approximate posterior parameterized by $\phi$
 % ================================================================
 \subsection{Federated GRU Load Forecasting Accuracy}
 
-\begin{figure}[!t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig03_fedgru_mae.pdf}
 \caption{Federated GRU load forecasting MAE across communication rounds. The proposed FedGRU with VAE latent features achieves MAE = 1.846\,kW after 20 communication rounds while preserving user privacy.}
@@ -542,7 +545,7 @@ where $\nabla \mathcal{L}_k$ is the gradient of client $k$'s local loss, $\nabla
 % ================================================================
 \subsection{Federated Learning RMSE Convergence}
 
-\begin{figure}[!t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig04_fl_rmse.pdf}
 \caption{RMSE convergence comparison across federated learning strategies. FedAvg-GRU achieves RMSE = 2.502\,kW, outperforming FedSGD and STFL baselines.}
@@ -560,7 +563,7 @@ where $\Delta(R)$ is the performance gap between federated and centralized model
 % ================================================================
 \subsection{Privacy-Accuracy Trade-off Under Client Variation}
 
-\begin{figure}[!t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig05_privacy_accuracy.pdf}
 \caption{Privacy-accuracy trade-off analysis under varying client participation fractions. The proposed framework achieves MAPE = 60.97\% at 40\% participation, with performance improving as more clients participate.}
@@ -578,7 +581,7 @@ where $\rho$ represents the proportion of clients taking part, $\text{MAPE}_{\in
 % ================================================================
 \subsection{Stackelberg Equilibrium Price Convergence}
 
-\begin{figure}[!t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig06_stackelberg_price.pdf}
 \caption{Comparative Stackelberg equilibrium price convergence across pricing mechanisms. The proposed approach converges to $p^* = 4.24$\,INR/kWh, reflecting the equilibrium point where leader profit is maximized given follower demand responses.}
@@ -592,7 +595,7 @@ Fig.~\ref{fig:sg_convergence} compares the convergence behavior of four pricing 
 % ================================================================
 \subsection{Hourly Stackelberg pricing vs.\ demand response}
 
-\begin{figure}[!t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig07_hourly_price_demand.pdf}
 \caption{Hourly Stackelberg equilibrium pricing and corresponding demand response. Dynamic SG pricing produces an inverse price-demand relationship alongside the DE-optimized schedule.}
@@ -610,7 +613,7 @@ where $p_h^{\text{blend}}$ is the final blended price offered to consumers at ho
 % ================================================================
 \subsection{differential evolution fitness convergence}
 
-\begin{figure}[!t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig08_de_fitness.pdf}
 \caption{DE fitness function convergence compared with metaheuristic and DRL baselines. The proposed DE/rand/1/bin converges within 500 generations using the real 8-term composite fitness function.}
@@ -624,7 +627,7 @@ Fig.~\ref{fig:de_fitness} depicts the convergence in fitness value of the sugges
 % ================================================================
 \subsection{Comparative Daily Energy Cost Reduction}
 
-\begin{figure}[!t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig09_cost_reduction.pdf}
 \caption{Comparative daily energy cost reduction across optimization frameworks. The proposed framework achieves 46.2\% cost reduction (1308\,INR $\to$ 704\,INR), outperforming all baselines.}
@@ -650,7 +653,7 @@ where $\Delta C$ is the cost savings, $\delta_{\text{min}}$ is the minimum savin
 % ================================================================
 \subsection{Peak Load Reduction: Peak-to-Average Ratio}
 
-\begin{figure}[!t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig10_par_comparison.pdf}
 \caption{Peak-to-Average Ratio (PAR) comparison across methods. The proposed framework achieves significant peak reduction from the unoptimized baseline.}
@@ -668,7 +671,7 @@ where $L_{\max}$ represents the maximum instantaneous hourly load (the peak dema
 % ================================================================
 \subsection{Hourly Load Distribution Before and After Optimization}
 
-\begin{figure}[!t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig11_load_distribution.pdf}
 \caption{Hourly load distribution comparison before and after optimization. The proposed framework achieves effective peak shaving and valley filling, producing the flattest load curve among all methods.}
@@ -686,7 +689,7 @@ where $\sigma_L$ measures the volatility or variance of the power consumption, $
 % ================================================================
 \subsection{Multi-Objective Performance Comparison}
 
-\begin{figure}[!t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=\columnwidth]{graphs/fig12_radar_comparison.pdf}
 \caption{Multi-objective radar comparison across six performance dimensions. The proposed framework achieves the largest coverage area, demonstrating balanced superiority across all evaluation criteria.}

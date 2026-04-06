@@ -1,134 +1,402 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<mxfile host="app.diagrams.net" modified="2026-03-01" agent="draw.io" type="device">
-  <diagram name="System Architecture" id="arch1">
-    <mxGraphModel dx="1800" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
-      <root>
-        <mxCell id="0"/>
-        <mxCell id="1" parent="0"/>
-        <mxCell id="title1" value="Privacy-Preserving Smart Home Energy Optimization Framework" style="text;align=center;verticalAlign=middle;fontSize=20;fontStyle=1;strokeColor=none;fillColor=none;fontFamily=Helvetica;" vertex="1" parent="1"><mxGeometry x="300" y="10" width="1000" height="35" as="geometry"/></mxCell>
-        <mxCell id="title2" value="Hybrid Architecture: &#946;-VAE + Federated GRU + Stackelberg Game + Differential Evolution" style="text;align=center;verticalAlign=middle;fontSize=12;fontColor=#666666;strokeColor=none;fillColor=none;fontFamily=Helvetica;" vertex="1" parent="1"><mxGeometry x="350" y="42" width="900" height="25" as="geometry"/></mxCell>
-        <mxCell id="s1_box" value="" style="rounded=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;arcSize=10;shadow=1;" vertex="1" parent="1"><mxGeometry x="20" y="80" width="270" height="200" as="geometry"/></mxCell>
-        <mxCell id="s1_badge" value="STAGE 1" style="rounded=1;fillColor=#6c8ebf;fontColor=#FFFFFF;fontSize=9;fontStyle=1;strokeColor=none;arcSize=50;" vertex="1" parent="1"><mxGeometry x="30" y="88" width="55" height="18" as="geometry"/></mxCell>
-        <mxCell id="s1_name" value="Digital Twin Simulator" style="text;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="40" y="108" width="230" height="25" as="geometry"/></mxCell>
-        <mxCell id="s1_icon1" value="" style="shape=mxgraph.cisco.computers_and_peripherals.pc;sketch=0;fillColor=#6c8ebf;strokeColor=none;" vertex="1" parent="1"><mxGeometry x="50" y="138" width="28" height="28" as="geometry"/></mxCell>
-        <mxCell id="s1_icon2" value="" style="shape=mxgraph.cisco.computers_and_peripherals.pc;sketch=0;fillColor=#6c8ebf;strokeColor=none;" vertex="1" parent="1"><mxGeometry x="88" y="138" width="28" height="28" as="geometry"/></mxCell>
-        <mxCell id="s1_icon3" value="" style="shape=mxgraph.cisco.computers_and_peripherals.pc;sketch=0;fillColor=#6c8ebf;strokeColor=none;" vertex="1" parent="1"><mxGeometry x="126" y="138" width="28" height="28" as="geometry"/></mxCell>
-        <mxCell id="s1_dots" value="&#183;&#183;&#183;" style="text;align=center;verticalAlign=middle;fontSize=16;fontStyle=1;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="160" y="138" width="25" height="28" as="geometry"/></mxCell>
-        <mxCell id="s1_icon4" value="" style="shape=mxgraph.cisco.computers_and_peripherals.pc;sketch=0;fillColor=#6c8ebf;strokeColor=none;" vertex="1" parent="1"><mxGeometry x="192" y="138" width="28" height="28" as="geometry"/></mxCell>
-        <mxCell id="s1_n" value="N = 50" style="text;align=center;verticalAlign=middle;fontSize=8;fontColor=#6c8ebf;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="228" y="143" width="40" height="18" as="geometry"/></mxCell>
-        <mxCell id="s1_d1" value="&#8226; 50 Smart Homes &#215; 30 Days" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="35" y="172" width="240" height="16" as="geometry"/></mxCell>
-        <mxCell id="s1_d2" value="&#8226; 7 Controllable Appliances" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="35" y="188" width="240" height="16" as="geometry"/></mxCell>
-        <mxCell id="s1_d3" value="&#8226; 144,000 Records (96 slots/day)" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="35" y="204" width="240" height="16" as="geometry"/></mxCell>
-        <mxCell id="s1_d4" value="&#8226; TOU Pricing (&#8377;2/5/12 per kWh)" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="35" y="220" width="240" height="16" as="geometry"/></mxCell>
-        <mxCell id="s1_d5" value="&#8226; 3-State Markov Occupancy" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="35" y="236" width="240" height="16" as="geometry"/></mxCell>
-        <mxCell id="s1_d6" value="&#8226; Temperature &amp; Humidity Sensors" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="35" y="252" width="240" height="16" as="geometry"/></mxCell>
-        <mxCell id="a12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeWidth=2.5;strokeColor=#6c8ebf;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="s1_box" target="s2_box"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="a12_lbl" value="Raw IoT Data&#10;(20+ features)" style="text;align=center;verticalAlign=middle;fontSize=9;fontColor=#6c8ebf;strokeColor=none;fillColor=#FFFFFF;fontStyle=2;" vertex="1" parent="1"><mxGeometry x="295" y="155" width="80" height="30" as="geometry"/></mxCell>
-        <mxCell id="s2_box" value="" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;arcSize=10;shadow=1;" vertex="1" parent="1"><mxGeometry x="380" y="80" width="250" height="200" as="geometry"/></mxCell>
-        <mxCell id="s2_badge" value="STAGE 2" style="rounded=1;fillColor=#82b366;fontColor=#FFFFFF;fontSize=9;fontStyle=1;strokeColor=none;arcSize=50;" vertex="1" parent="1"><mxGeometry x="390" y="88" width="55" height="18" as="geometry"/></mxCell>
-        <mxCell id="s2_name" value="Data Preprocessing" style="text;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="400" y="108" width="210" height="25" as="geometry"/></mxCell>
-        <mxCell id="s2_gear" value="" style="shape=mxgraph.signs.industry.gear;fillColor=#82b366;strokeColor=none;" vertex="1" parent="1"><mxGeometry x="575" y="90" width="35" height="35" as="geometry"/></mxCell>
-        <mxCell id="s2_d1" value="&#8226; IQR Outlier Detection &amp; Clipping" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="392" y="140" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="s2_d2" value="&#8226; Cyclical Time Encoding (sin/cos)" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="392" y="158" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="s2_d3" value="&#8226; MinMax Normalization [0,1]" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="392" y="176" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="s2_d4" value="&#8226; Rolling Statistics &amp; Lag Features" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="392" y="194" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="s2_d5" value="&#8226; 70/15/15 Train-Val-Test Split" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="392" y="212" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="s2_d6" value="&#8226; Output: 19-dim Feature Vector" style="text;align=left;verticalAlign=middle;fontSize=10;fontStyle=1;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="392" y="232" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="a23" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeWidth=2.5;strokeColor=#82b366;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="s2_box" target="s3_box"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="a23_lbl" value="Clean Features&#10;(d = 19)" style="text;align=center;verticalAlign=middle;fontSize=9;fontColor=#82b366;strokeColor=none;fillColor=#FFFFFF;fontStyle=2;" vertex="1" parent="1"><mxGeometry x="635" y="155" width="75" height="30" as="geometry"/></mxCell>
-        <mxCell id="s3_box" value="" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;arcSize=10;shadow=1;" vertex="1" parent="1"><mxGeometry x="715" y="80" width="260" height="200" as="geometry"/></mxCell>
-        <mxCell id="s3_badge" value="STAGE 3" style="rounded=1;fillColor=#d6b656;fontColor=#FFFFFF;fontSize=9;fontStyle=1;strokeColor=none;arcSize=50;" vertex="1" parent="1"><mxGeometry x="725" y="88" width="55" height="18" as="geometry"/></mxCell>
-        <mxCell id="s3_name" value="&#946;-VAE Feature Extraction" style="text;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="735" y="108" width="220" height="25" as="geometry"/></mxCell>
-        <mxCell id="s3_brain" value="" style="shape=mxgraph.signs.healthcare.neurology;fillColor=#d6b656;strokeColor=none;" vertex="1" parent="1"><mxGeometry x="920" y="88" width="35" height="35" as="geometry"/></mxCell>
-        <mxCell id="s3_enc" value="Encoder" style="rounded=1;fillColor=#FFF5CC;strokeColor=#d6b656;fontSize=9;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="730" y="140" width="55" height="22" as="geometry"/></mxCell>
-        <mxCell id="s3_lat" value="&#956;, &#963; &#8594; z" style="ellipse;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="810" y="137" width="55" height="28" as="geometry"/></mxCell>
-        <mxCell id="s3_dec" value="Decoder" style="rounded=1;fillColor=#FFF5CC;strokeColor=#d6b656;fontSize=9;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="890" y="140" width="55" height="22" as="geometry"/></mxCell>
-        <mxCell id="s3_ea1" value="" style="endArrow=classic;strokeColor=#d6b656;strokeWidth=1.5;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="785" y="151" as="sourcePoint"/><mxPoint x="810" y="151" as="targetPoint"/></mxGeometry></mxCell>
-        <mxCell id="s3_ea2" value="" style="endArrow=classic;strokeColor=#d6b656;strokeWidth=1.5;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="865" y="151" as="sourcePoint"/><mxPoint x="890" y="151" as="targetPoint"/></mxGeometry></mxCell>
-        <mxCell id="s3_d1" value="&#8226; Architecture: 19 &#8594; 64 &#8594; 32 &#8594; 16" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="728" y="172" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="s3_d2" value="&#8226; Reparameterization Trick" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="728" y="190" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="s3_d3" value="&#8226; &#946; = 0.5 (KL Weight)" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="728" y="208" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="s3_d4" value="&#8226; Batch Normalization + ReLU" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="728" y="226" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="s3_d5" value="&#8226; Latent Dimension: d_z = 16" style="text;align=left;verticalAlign=middle;fontSize=10;fontStyle=1;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="728" y="244" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="a34" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeWidth=2.5;strokeColor=#d6b656;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="s3_box" target="s4_box"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="a34_lbl" value="Latent Vectors (d_z = 16)" style="text;align=center;verticalAlign=middle;fontSize=9;fontColor=#d6b656;strokeColor=none;fillColor=#FFFFFF;fontStyle=2;" vertex="1" parent="1"><mxGeometry x="855" y="295" width="120" height="20" as="geometry"/></mxCell>
-        <mxCell id="s4_box" value="" style="rounded=1;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;arcSize=10;shadow=1;" vertex="1" parent="1"><mxGeometry x="715" y="330" width="260" height="200" as="geometry"/></mxCell>
-        <mxCell id="s4_badge" value="STAGE 4" style="rounded=1;fillColor=#9673a6;fontColor=#FFFFFF;fontSize=9;fontStyle=1;strokeColor=none;arcSize=50;" vertex="1" parent="1"><mxGeometry x="725" y="338" width="55" height="18" as="geometry"/></mxCell>
-        <mxCell id="s4_name" value="Federated GRU Forecasting" style="text;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="735" y="358" width="220" height="25" as="geometry"/></mxCell>
-        <mxCell id="s4_shield" value="" style="shape=mxgraph.signs.safety.shield;fillColor=#9673a6;strokeColor=none;" vertex="1" parent="1"><mxGeometry x="920" y="335" width="32" height="38" as="geometry"/></mxCell>
-        <mxCell id="s4_srv" value="Server" style="ellipse;fillColor=#D4C4E0;strokeColor=#9673a6;fontSize=9;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="740" y="390" width="50" height="24" as="geometry"/></mxCell>
-        <mxCell id="s4_c1" value="" style="ellipse;fillColor=#9673a6;strokeColor=none;opacity=60;" vertex="1" parent="1"><mxGeometry x="808" y="385" width="14" height="14" as="geometry"/></mxCell>
-        <mxCell id="s4_c2" value="" style="ellipse;fillColor=#9673a6;strokeColor=none;opacity=60;" vertex="1" parent="1"><mxGeometry x="828" y="385" width="14" height="14" as="geometry"/></mxCell>
-        <mxCell id="s4_c3" value="" style="ellipse;fillColor=#9673a6;strokeColor=none;opacity=60;" vertex="1" parent="1"><mxGeometry x="808" y="405" width="14" height="14" as="geometry"/></mxCell>
-        <mxCell id="s4_c4" value="" style="ellipse;fillColor=#9673a6;strokeColor=none;opacity=60;" vertex="1" parent="1"><mxGeometry x="828" y="405" width="14" height="14" as="geometry"/></mxCell>
-        <mxCell id="s4_ca1" value="" style="endArrow=classic;startArrow=classic;strokeColor=#9673a6;strokeWidth=1;dashed=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="790" y="402" as="sourcePoint"/><mxPoint x="808" y="395" as="targetPoint"/></mxGeometry></mxCell>
-        <mxCell id="s4_ca2" value="" style="endArrow=classic;startArrow=classic;strokeColor=#9673a6;strokeWidth=1;dashed=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="790" y="402" as="sourcePoint"/><mxPoint x="808" y="410" as="targetPoint"/></mxGeometry></mxCell>
-        <mxCell id="s4_d1" value="&#8226; K = 50 Clients (Smart Homes)" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="728" y="428" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="s4_d2" value="&#8226; 2-Layer GRU (hidden = 64)" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="728" y="444" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="s4_d3" value="&#8226; Seq Length L = 16 (4 hrs)" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="728" y="460" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="s4_d4" value="&#8226; FedAvg: 20 Rounds, E = 5" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="728" y="476" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="s4_d5" value="&#8226; 40% Client Participation" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="728" y="492" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="s4_d6" value="&#8226; Privacy: No Raw Data Shared" style="text;align=left;verticalAlign=middle;fontSize=10;fontStyle=1;strokeColor=none;fillColor=none;fontColor=#9673a6;" vertex="1" parent="1"><mxGeometry x="728" y="508" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="a45" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeWidth=2.5;strokeColor=#9673a6;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="s4_box" target="s5_box"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="a45_lbl" value="Load Forecasts &#375;(t+1)" style="text;align=center;verticalAlign=middle;fontSize=9;fontColor=#9673a6;strokeColor=none;fillColor=#FFFFFF;fontStyle=2;" vertex="1" parent="1"><mxGeometry x="640" y="415" width="110" height="20" as="geometry"/></mxCell>
-        <mxCell id="s5_box" value="" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;arcSize=10;shadow=1;" vertex="1" parent="1"><mxGeometry x="380" y="330" width="250" height="200" as="geometry"/></mxCell>
-        <mxCell id="s5_badge" value="STAGE 5" style="rounded=1;fillColor=#b85450;fontColor=#FFFFFF;fontSize=9;fontStyle=1;strokeColor=none;arcSize=50;" vertex="1" parent="1"><mxGeometry x="390" y="338" width="55" height="18" as="geometry"/></mxCell>
-        <mxCell id="s5_name" value="Stackelberg Game Pricing" style="text;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="400" y="358" width="210" height="25" as="geometry"/></mxCell>
-        <mxCell id="s5_chess" value="" style="shape=mxgraph.signs.sports.chess;fillColor=#b85450;strokeColor=none;" vertex="1" parent="1"><mxGeometry x="580" y="338" width="32" height="32" as="geometry"/></mxCell>
-        <mxCell id="s5_leader" value="Leader" style="rhombus;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="400" y="392" width="55" height="30" as="geometry"/></mxCell>
-        <mxCell id="s5_arr" value="" style="endArrow=classic;strokeColor=#b85450;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="455" y="407" as="sourcePoint"/><mxPoint x="490" y="407" as="targetPoint"/></mxGeometry></mxCell>
-        <mxCell id="s5_follow" value="Followers" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;fontStyle=2;" vertex="1" parent="1"><mxGeometry x="490" y="395" width="55" height="24" as="geometry"/></mxCell>
-        <mxCell id="s5_d1" value="&#8226; Leader: Grid Operator (Price)" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="392" y="430" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="s5_d2" value="&#8226; Followers: 50 Smart Homes" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="392" y="446" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="s5_d3" value="&#8226; Comfort Weight w = 15.0" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="392" y="462" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="s5_d4" value="&#8226; Supply Capacity K = 150 kW" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="392" y="478" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="s5_d5" value="&#8226; Price Range: [&#8377;3, &#8377;15]/kWh" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="392" y="494" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="s5_d6" value="&#8226; Equilibrium: p* &#8776; &#8377;4.24/kWh" style="text;align=left;verticalAlign=middle;fontSize=10;fontStyle=1;strokeColor=none;fillColor=none;fontColor=#b85450;" vertex="1" parent="1"><mxGeometry x="392" y="510" width="230" height="16" as="geometry"/></mxCell>
-        <mxCell id="a56" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeWidth=2.5;strokeColor=#b85450;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="s5_box" target="s6_box"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="a56_lbl" value="Dynamic Prices p*_h" style="text;align=center;verticalAlign=middle;fontSize=9;fontColor=#b85450;strokeColor=none;fillColor=#FFFFFF;fontStyle=2;" vertex="1" parent="1"><mxGeometry x="295" y="415" width="100" height="20" as="geometry"/></mxCell>
-        <mxCell id="s6_box" value="" style="rounded=1;whiteSpace=wrap;fillColor=#d0e0f0;strokeColor=#4472C4;arcSize=10;shadow=1;" vertex="1" parent="1"><mxGeometry x="20" y="330" width="270" height="200" as="geometry"/></mxCell>
-        <mxCell id="s6_badge" value="STAGE 6" style="rounded=1;fillColor=#4472C4;fontColor=#FFFFFF;fontSize=9;fontStyle=1;strokeColor=none;arcSize=50;" vertex="1" parent="1"><mxGeometry x="30" y="338" width="55" height="18" as="geometry"/></mxCell>
-        <mxCell id="s6_name" value="DE Schedule Optimization" style="text;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="40" y="358" width="230" height="25" as="geometry"/></mxCell>
-        <mxCell id="s6_dna" value="" style="shape=mxgraph.signs.nature.DNA;fillColor=#4472C4;strokeColor=none;" vertex="1" parent="1"><mxGeometry x="242" y="336" width="30" height="36" as="geometry"/></mxCell>
-        <mxCell id="de_p" value="Pop" style="rounded=1;fillColor=#B8CCE4;strokeColor=#4472C4;fontSize=8;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="40" y="393" width="38" height="18" as="geometry"/></mxCell>
-        <mxCell id="de_ea1" value="" style="endArrow=classic;strokeColor=#4472C4;strokeWidth=1.5;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="78" y="402" as="sourcePoint"/><mxPoint x="96" y="402" as="targetPoint"/></mxGeometry></mxCell>
-        <mxCell id="de_m" value="Mutate" style="rounded=1;fillColor=#B8CCE4;strokeColor=#4472C4;fontSize=8;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="96" y="393" width="45" height="18" as="geometry"/></mxCell>
-        <mxCell id="de_ea2" value="" style="endArrow=classic;strokeColor=#4472C4;strokeWidth=1.5;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="141" y="402" as="sourcePoint"/><mxPoint x="155" y="402" as="targetPoint"/></mxGeometry></mxCell>
-        <mxCell id="de_x" value="Cross" style="rounded=1;fillColor=#B8CCE4;strokeColor=#4472C4;fontSize=8;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="155" y="393" width="42" height="18" as="geometry"/></mxCell>
-        <mxCell id="de_ea3" value="" style="endArrow=classic;strokeColor=#4472C4;strokeWidth=1.5;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="197" y="402" as="sourcePoint"/><mxPoint x="211" y="402" as="targetPoint"/></mxGeometry></mxCell>
-        <mxCell id="de_s" value="Select" style="rounded=1;fillColor=#B8CCE4;strokeColor=#4472C4;fontSize=8;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="211" y="393" width="42" height="18" as="geometry"/></mxCell>
-        <mxCell id="s6_d1" value="&#8226; DE/rand/1/bin (F=0.8, CR=0.9)" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="35" y="422" width="240" height="16" as="geometry"/></mxCell>
-        <mxCell id="s6_d2" value="&#8226; Pop = 100, Gen = 500" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="35" y="438" width="240" height="16" as="geometry"/></mxCell>
-        <mxCell id="s6_d3" value="&#8226; 7 Appliances &#215; 96 Time Slots" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="35" y="454" width="240" height="16" as="geometry"/></mxCell>
-        <mxCell id="s6_d4" value="&#8226; 8-Term Fitness Function" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="35" y="470" width="240" height="16" as="geometry"/></mxCell>
-        <mxCell id="s6_d5" value="&#8226; ON-Count Repair Operator" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="35" y="486" width="240" height="16" as="geometry"/></mxCell>
-        <mxCell id="s6_d6" value="&#8226; Cost Savings: 46.2%" style="text;align=left;verticalAlign=middle;fontSize=10;fontStyle=1;strokeColor=none;fillColor=none;fontColor=#4472C4;" vertex="1" parent="1"><mxGeometry x="35" y="502" width="240" height="16" as="geometry"/></mxCell>
-        <mxCell id="a6out" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeWidth=2.5;strokeColor=#4472C4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="s6_box" target="out_box"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="a6out_lbl" value="Optimized Schedule S*" style="text;align=center;verticalAlign=middle;fontSize=9;fontColor=#4472C4;strokeColor=none;fillColor=#FFFFFF;fontStyle=2;" vertex="1" parent="1"><mxGeometry x="175" y="575" width="120" height="20" as="geometry"/></mxCell>
-        <mxCell id="out_box" value="" style="rounded=1;whiteSpace=wrap;fillColor=#F5F5F5;strokeColor=#333333;arcSize=10;shadow=1;strokeWidth=2;" vertex="1" parent="1"><mxGeometry x="380" y="590" width="370" height="100" as="geometry"/></mxCell>
-        <mxCell id="out_title" value="OUTPUT: Interactive Dashboard" style="text;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="400" y="594" width="280" height="25" as="geometry"/></mxCell>
-        <mxCell id="out_d1" value="&#8226; Real-time Plotly Dash Web Interface" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="395" y="622" width="280" height="15" as="geometry"/></mxCell>
-        <mxCell id="out_d2" value="&#8226; Appliance Toggle + 24-hr Schedule" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="395" y="638" width="280" height="15" as="geometry"/></mxCell>
-        <mxCell id="out_d3" value="&#8226; Before/After Cost &amp; Load Comparison" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="395" y="654" width="280" height="15" as="geometry"/></mxCell>
-        <mxCell id="out_d4" value="&#8226; SG Prices + GRU Metrics (MAE, RMSE)" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="395" y="670" width="280" height="15" as="geometry"/></mxCell>
-        <mxCell id="out_icon" value="" style="shape=mxgraph.cisco.misc.monitor;fillColor=#666666;strokeColor=none;" vertex="1" parent="1"><mxGeometry x="708" y="600" width="30" height="30" as="geometry"/></mxCell>
-        <mxCell id="ce_box" value="" style="rounded=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;arcSize=12;dashed=1;dashPattern=5 3;" vertex="1" parent="1"><mxGeometry x="20" y="580" width="250" height="90" as="geometry"/></mxCell>
-        <mxCell id="ce_title" value="Constraint Engine" style="text;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="60" y="583" width="170" height="22" as="geometry"/></mxCell>
-        <mxCell id="ce_d1" value="&#8226; Max Power: 15 kW/hr" style="text;align=left;verticalAlign=middle;fontSize=9;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="35" y="608" width="200" height="14" as="geometry"/></mxCell>
-        <mxCell id="ce_d2" value="&#8226; Max Energy: 80 kWh/day" style="text;align=left;verticalAlign=middle;fontSize=9;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="35" y="624" width="200" height="14" as="geometry"/></mxCell>
-        <mxCell id="ce_d3" value="&#8226; ON-count conservation (hard)" style="text;align=left;verticalAlign=middle;fontSize=9;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="35" y="640" width="200" height="14" as="geometry"/></mxCell>
-        <mxCell id="ce_arr" value="" style="endArrow=classic;startArrow=classic;strokeColor=#d79b00;dashed=1;strokeWidth=2;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="ce_box" target="s6_box"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="priv_box" value="" style="rounded=1;whiteSpace=wrap;fillColor=none;strokeColor=#9673a6;dashed=1;dashPattern=8 4;arcSize=12;" vertex="1" parent="1"><mxGeometry x="1010" y="340" width="150" height="90" as="geometry"/></mxCell>
-        <mxCell id="priv_t" value="&#128274; Privacy Boundary" style="text;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;fontColor=#9673a6;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="1015" y="345" width="140" height="18" as="geometry"/></mxCell>
-        <mxCell id="priv_d" value="Raw data never leaves&#10;individual homes.&#10;Only model weights&#10;are aggregated." style="text;align=center;verticalAlign=top;fontSize=9;fontColor=#9673a6;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="1020" y="365" width="130" height="55" as="geometry"/></mxCell>
-        <mxCell id="priv_a" value="" style="endArrow=none;strokeColor=#9673a6;dashed=1;strokeWidth=1.5;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="975" y="390" as="sourcePoint"/><mxPoint x="1010" y="390" as="targetPoint"/></mxGeometry></mxCell>
-        <mxCell id="res_box" value="" style="rounded=1;whiteSpace=wrap;fillColor=#E8F5E9;strokeColor=#4CAF50;arcSize=12;shadow=1;" vertex="1" parent="1"><mxGeometry x="1010" y="460" width="150" height="105" as="geometry"/></mxCell>
-        <mxCell id="res_t" value="&#128202; Key Results" style="text;align=center;verticalAlign=middle;fontSize=11;fontStyle=1;strokeColor=none;fillColor=none;fontColor=#2E7D32;" vertex="1" parent="1"><mxGeometry x="1020" y="465" width="130" height="20" as="geometry"/></mxCell>
-        <mxCell id="res_d1" value="MAE = 1.846 kW" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="1025" y="490" width="120" height="15" as="geometry"/></mxCell>
-        <mxCell id="res_d2" value="RMSE = 2.502 kW" style="text;align=left;verticalAlign=middle;fontSize=10;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="1025" y="506" width="120" height="15" as="geometry"/></mxCell>
-        <mxCell id="res_d3" value="Cost Savings = 46.2%" style="text;align=left;verticalAlign=middle;fontSize=10;fontStyle=1;strokeColor=none;fillColor=none;fontColor=#2E7D32;" vertex="1" parent="1"><mxGeometry x="1025" y="522" width="130" height="15" as="geometry"/></mxCell>
-        <mxCell id="res_d4" value="SG Equilibrium = &#8377;4.24" style="text;align=left;verticalAlign=middle;fontSize=10;fontStyle=1;strokeColor=none;fillColor=none;fontColor=#2E7D32;" vertex="1" parent="1"><mxGeometry x="1025" y="538" width="130" height="15" as="geometry"/></mxCell>
-      </root>
-    </mxGraphModel>
-  </diagram>
-</mxfile>
+<mxGraphModel dx="3860" dy="1124" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1100" background="#FFFFFF" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+    <mxCell id="title1" parent="1" style="text;align=center;verticalAlign=middle;fontSize=22;fontStyle=1;fontColor=#111111;strokeColor=none;fillColor=none;fontFamily=Helvetica;" value="Privacy-Preserving Smart Home Energy Optimization Framework" vertex="1">
+      <mxGeometry height="40" width="1200" x="300" y="15" as="geometry" />
+    </mxCell>
+    <mxCell id="title2" parent="1" style="text;align=center;verticalAlign=middle;fontSize=13;fontColor=#666666;strokeColor=none;fillColor=none;fontFamily=Helvetica;" value="Hybrid Architecture: β-VAE + Federated GRU + Stackelberg Game + Differential Evolution" vertex="1">
+      <mxGeometry height="25" width="1100" x="350" y="52" as="geometry" />
+    </mxCell>
+    <mxCell id="s1_box" parent="1" style="shape=mxgraph.floorplan.room;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;shadow=1;strokeWidth=2;" value="" vertex="1">
+      <mxGeometry height="230" width="310" x="20" y="95" as="geometry" />
+    </mxCell>
+    <mxCell id="s1_badge" parent="1" style="rounded=1;fillColor=#6c8ebf;fontColor=#FFFFFF;fontSize=9;fontStyle=1;strokeColor=none;arcSize=50;" value="STAGE 1" vertex="1">
+      <mxGeometry height="18" width="55" x="35" y="105" as="geometry" />
+    </mxCell>
+    <mxCell id="s1_name" parent="1" style="text;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#111111;strokeColor=none;fillColor=none;" value="Digital Twin Simulator" vertex="1">
+      <mxGeometry height="25" width="250" x="55" y="125" as="geometry" />
+    </mxCell>
+    <mxCell id="s1_icon1" parent="1" style="text;align=center;verticalAlign=middle;fontSize=24;strokeColor=none;fillColor=none;" value="🏠" vertex="1">
+      <mxGeometry height="28" width="28" x="55" y="156" as="geometry" />
+    </mxCell>
+    <mxCell id="s1_icon2" parent="1" style="text;align=center;verticalAlign=middle;fontSize=24;strokeColor=none;fillColor=none;" value="📶" vertex="1">
+      <mxGeometry height="28" width="28" x="98" y="156" as="geometry" />
+    </mxCell>
+    <mxCell id="s1_icon3" parent="1" style="text;align=center;verticalAlign=middle;fontSize=24;strokeColor=none;fillColor=none;" value="📱" vertex="1">
+      <mxGeometry height="28" width="25" x="140" y="156" as="geometry" />
+    </mxCell>
+    <mxCell id="s1_dots" parent="1" style="text;align=center;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#333333;strokeColor=none;fillColor=none;" value="···" vertex="1">
+      <mxGeometry height="28" width="25" x="174" y="158" as="geometry" />
+    </mxCell>
+    <mxCell id="s1_icon4" parent="1" style="text;align=center;verticalAlign=middle;fontSize=24;strokeColor=none;fillColor=none;" value="🔋" vertex="1">
+      <mxGeometry height="28" width="28" x="208" y="156" as="geometry" />
+    </mxCell>
+    <mxCell id="s1_n" parent="1" style="text;align=center;verticalAlign=middle;fontSize=8;fontColor=#6c8ebf;strokeColor=none;fillColor=none;fontStyle=1" value="(N = 50)" vertex="1">
+      <mxGeometry height="18" width="50" x="240" y="163" as="geometry" />
+    </mxCell>
+    <mxCell id="s1_d1" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• 50 Smart Homes × 30 Days" vertex="1">
+      <mxGeometry height="16" width="260" x="45" y="195" as="geometry" />
+    </mxCell>
+    <mxCell id="s1_d2" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• 7 Controllable Appliances" vertex="1">
+      <mxGeometry height="16" width="260" x="45" y="213" as="geometry" />
+    </mxCell>
+    <mxCell id="s1_d3" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• 144,000 Records (96 slots/day)" vertex="1">
+      <mxGeometry height="16" width="260" x="45" y="231" as="geometry" />
+    </mxCell>
+    <mxCell id="s1_d4" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• TOU Pricing (₹2/5/12 per kWh)" vertex="1">
+      <mxGeometry height="16" width="260" x="45" y="249" as="geometry" />
+    </mxCell>
+    <mxCell id="s1_d5" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• 3-State Markov Occupancy" vertex="1">
+      <mxGeometry height="16" width="260" x="45" y="267" as="geometry" />
+    </mxCell>
+    <mxCell id="s1_d6" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Temperature &amp; Humidity Sensors" vertex="1">
+      <mxGeometry height="16" width="260" x="45" y="285" as="geometry" />
+    </mxCell>
+    <mxCell id="a12" edge="1" parent="1" source="s1_box" style="edgeStyle=orthogonalEdgeStyle;curved=1;strokeWidth=2;strokeColor=#00BCD4;dashed=1;dashPattern=8 3 2 3;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;startArrow=oval;startFill=1;startSize=4;" target="s2_box" value="">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="a12_lbl" parent="1" style="text;align=center;verticalAlign=middle;fontSize=9;fontColor=#00838F;strokeColor=none;fillColor=#E0F7FA;rounded=1;fontStyle=3;spacingLeft=4;spacingRight=4;" value="〰 Raw IoT Data&#xa;(20+ features)" vertex="1">
+      <mxGeometry height="30" width="90" x="335" y="185" as="geometry" />
+    </mxCell>
+    <mxCell id="s2_box" parent="1" style="shape=cylinder3;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;shadow=1;size=15;strokeWidth=2;" value="" vertex="1">
+      <mxGeometry height="240" width="290" x="430" y="90" as="geometry" />
+    </mxCell>
+    <mxCell id="s2_badge" parent="1" style="rounded=1;fillColor=#82b366;fontColor=#FFFFFF;fontSize=9;fontStyle=1;strokeColor=none;arcSize=50;" value="STAGE 2" vertex="1">
+      <mxGeometry height="18" width="55" x="445" y="115" as="geometry" />
+    </mxCell>
+    <mxCell id="s2_name" parent="1" style="text;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#111111;strokeColor=none;fillColor=none;" value="Data Preprocessing" vertex="1">
+      <mxGeometry height="25" width="230" x="460" y="138" as="geometry" />
+    </mxCell>
+    <mxCell id="s2_gear" parent="1" style="text;align=center;verticalAlign=middle;fontSize=26;strokeColor=none;fillColor=none;" value="⚙️" vertex="1">
+      <mxGeometry height="35" width="35" x="665" y="115" as="geometry" />
+    </mxCell>
+    <mxCell id="s2_d1" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• IQR Outlier Detection &amp; Clipping" vertex="1">
+      <mxGeometry height="16" width="250" x="452" y="172" as="geometry" />
+    </mxCell>
+    <mxCell id="s2_d2" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Cyclical Time Encoding (sin/cos)" vertex="1">
+      <mxGeometry height="16" width="250" x="452" y="190" as="geometry" />
+    </mxCell>
+    <mxCell id="s2_d3" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• MinMax Normalization [0,1]" vertex="1">
+      <mxGeometry height="16" width="250" x="452" y="208" as="geometry" />
+    </mxCell>
+    <mxCell id="s2_d4" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Rolling Statistics &amp; Lag Features" vertex="1">
+      <mxGeometry height="16" width="250" x="452" y="226" as="geometry" />
+    </mxCell>
+    <mxCell id="s2_d5" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• 70/15/15 Train-Val-Test Split" vertex="1">
+      <mxGeometry height="16" width="250" x="452" y="244" as="geometry" />
+    </mxCell>
+    <mxCell id="s2_d6" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontStyle=1;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Output: 19-dim Feature Vector" vertex="1">
+      <mxGeometry height="16" width="250" x="452" y="264" as="geometry" />
+    </mxCell>
+    <mxCell id="a23" edge="1" parent="1" source="s2_box" style="edgeStyle=orthogonalEdgeStyle;curved=1;strokeWidth=2;strokeColor=#00BCD4;dashed=1;dashPattern=8 3 2 3;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;startArrow=oval;startFill=1;startSize=4;" target="s3_box" value="">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="a23_lbl" parent="1" style="text;align=center;verticalAlign=middle;fontSize=9;fontColor=#00838F;strokeColor=none;fillColor=#E0F7FA;rounded=1;fontStyle=3;spacingLeft=4;spacingRight=4;" value="〰 Clean Features&#xa;(d = 19)" vertex="1">
+      <mxGeometry height="30" width="85" x="730" y="158" as="geometry" />
+    </mxCell>
+    <mxCell id="s3_box" parent="1" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;shadow=1;size=25;strokeWidth=2;" value="" vertex="1">
+      <mxGeometry height="260" width="340" x="815" y="80" as="geometry" />
+    </mxCell>
+    <mxCell id="s3_badge" parent="1" style="rounded=1;fillColor=#d6b656;fontColor=#FFFFFF;fontSize=9;fontStyle=1;strokeColor=none;arcSize=50;" value="STAGE 3" vertex="1">
+      <mxGeometry height="18" width="55" x="957.5" y="109" as="geometry" />
+    </mxCell>
+    <mxCell id="s3_name" parent="1" style="text;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#111111;strokeColor=none;fillColor=none;" value="β-VAE Feature Extraction" vertex="1">
+      <mxGeometry height="25" width="220" x="880" y="84" as="geometry" />
+    </mxCell>
+    <mxCell id="s3_brain" parent="1" style="text;align=center;verticalAlign=middle;fontSize=26;strokeColor=none;fillColor=none;" value="🧠" vertex="1">
+      <mxGeometry height="35" width="35" x="1085" y="70" as="geometry" />
+    </mxCell>
+    <mxCell id="s3_enc" parent="1" style="rounded=1;fillColor=#FFF5CC;strokeColor=#d6b656;fontSize=9;fontStyle=1;fontColor=#333333;" value="Encoder" vertex="1">
+      <mxGeometry height="22" width="55" x="870" y="187" as="geometry" />
+    </mxCell>
+    <mxCell id="s3_lat" parent="1" style="ellipse;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;fontColor=#333333;" value="μ, σ → z" vertex="1">
+      <mxGeometry height="28" width="55" x="950" y="184" as="geometry" />
+    </mxCell>
+    <mxCell id="s3_dec" parent="1" style="rounded=1;fillColor=#FFF5CC;strokeColor=#d6b656;fontSize=9;fontStyle=1;fontColor=#333333;" value="Decoder" vertex="1">
+      <mxGeometry height="22" width="55" x="1030" y="187" as="geometry" />
+    </mxCell>
+    <mxCell id="s3_ea1" edge="1" parent="1" style="endArrow=classic;strokeColor=#d6b656;strokeWidth=1.5;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="925" y="196" as="sourcePoint" />
+        <mxPoint x="950" y="196" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="s3_ea2" edge="1" parent="1" style="endArrow=classic;strokeColor=#d6b656;strokeWidth=1.5;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1005" y="196" as="sourcePoint" />
+        <mxPoint x="1030" y="196" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="s3_d1" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Architecture: 19 → 64 → 32 → 16" vertex="1">
+      <mxGeometry height="16" width="230" x="870" y="242" as="geometry" />
+    </mxCell>
+    <mxCell id="s3_d2" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Reparameterization Trick" vertex="1">
+      <mxGeometry height="16" width="230" x="870" y="260" as="geometry" />
+    </mxCell>
+    <mxCell id="s3_d3" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• β = 0.5 (KL Weight)" vertex="1">
+      <mxGeometry height="16" width="230" x="870" y="278" as="geometry" />
+    </mxCell>
+    <mxCell id="s3_d4" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Batch Normalization + ReLU" vertex="1">
+      <mxGeometry height="16" width="230" x="870" y="296" as="geometry" />
+    </mxCell>
+    <mxCell id="s3_d5" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontStyle=1;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Latent Dimension: d_z = 16" vertex="1">
+      <mxGeometry height="16" width="230" x="870" y="314" as="geometry" />
+    </mxCell>
+    <mxCell id="a34" edge="1" parent="1" source="s3_box" style="edgeStyle=orthogonalEdgeStyle;curved=1;strokeWidth=2;strokeColor=#00BCD4;dashed=1;dashPattern=8 3 2 3;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.438;entryY=0.079;entryDx=0;entryDy=0;endArrow=open;endFill=0;startArrow=oval;startFill=1;startSize=4;entryPerimeter=0;" target="s4_box" value="">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="a34_lbl" parent="1" style="text;align=center;verticalAlign=middle;fontSize=9;fontColor=#00838F;strokeColor=none;fillColor=#E0F7FA;rounded=1;fontStyle=3;spacingLeft=4;spacingRight=4;" value="〰 Latent Vectors (d_z = 16)" vertex="1">
+      <mxGeometry height="20" width="140" x="985" y="360" as="geometry" />
+    </mxCell>
+    <mxCell id="s4_box" parent="1" style="shape=cloud;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;shadow=1;strokeWidth=2;" value="" vertex="1">
+      <mxGeometry height="300" width="420" x="780" y="400" as="geometry" />
+    </mxCell>
+    <mxCell id="s4_badge" parent="1" style="rounded=1;fillColor=#9673a6;fontColor=#FFFFFF;fontSize=9;fontStyle=1;strokeColor=none;arcSize=50;" value="STAGE 4" vertex="1">
+      <mxGeometry height="18" width="55" x="921" y="440" as="geometry" />
+    </mxCell>
+    <mxCell id="s4_name" parent="1" style="text;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#111111;strokeColor=none;fillColor=none;" value="Federated GRU Forecasting" vertex="1">
+      <mxGeometry height="25" width="230" x="870" y="462" as="geometry" />
+    </mxCell>
+    <mxCell id="s4_shield" parent="1" style="text;align=center;verticalAlign=middle;fontSize=26;strokeColor=none;fillColor=none;" value="🛡️" vertex="1">
+      <mxGeometry height="38" width="32" x="1093" y="469" as="geometry" />
+    </mxCell>
+    <mxCell id="s4_srv" parent="1" style="ellipse;fillColor=#D4C4E0;strokeColor=#9673a6;fontSize=9;fontStyle=1;fontColor=#333333;" value="Server" vertex="1">
+      <mxGeometry height="24" width="50" x="890" y="495" as="geometry" />
+    </mxCell>
+    <mxCell id="s4_c1" parent="1" style="ellipse;fillColor=#9673a6;strokeColor=none;opacity=60;" value="" vertex="1">
+      <mxGeometry height="14" width="14" x="960" y="492" as="geometry" />
+    </mxCell>
+    <mxCell id="s4_c2" parent="1" style="ellipse;fillColor=#9673a6;strokeColor=none;opacity=60;" value="" vertex="1">
+      <mxGeometry height="14" width="14" x="980" y="492" as="geometry" />
+    </mxCell>
+    <mxCell id="s4_c3" parent="1" style="ellipse;fillColor=#9673a6;strokeColor=none;opacity=60;" value="" vertex="1">
+      <mxGeometry height="14" width="14" x="960" y="512" as="geometry" />
+    </mxCell>
+    <mxCell id="s4_c4" parent="1" style="ellipse;fillColor=#9673a6;strokeColor=none;opacity=60;" value="" vertex="1">
+      <mxGeometry height="14" width="14" x="980" y="512" as="geometry" />
+    </mxCell>
+    <mxCell id="s4_ca1" edge="1" parent="1" style="endArrow=classic;startArrow=classic;strokeColor=#9673a6;strokeWidth=1;dashed=1;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="940" y="507" as="sourcePoint" />
+        <mxPoint x="960" y="500" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="s4_ca2" edge="1" parent="1" style="endArrow=classic;startArrow=classic;strokeColor=#9673a6;strokeWidth=1;dashed=1;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="940" y="507" as="sourcePoint" />
+        <mxPoint x="960" y="517" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="s4_d1" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• K = 50 Clients (Smart Homes)" vertex="1">
+      <mxGeometry height="16" width="240" x="880" y="535" as="geometry" />
+    </mxCell>
+    <mxCell id="s4_d2" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• 2-Layer GRU (hidden = 64)" vertex="1">
+      <mxGeometry height="16" width="240" x="880" y="553" as="geometry" />
+    </mxCell>
+    <mxCell id="s4_d3" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Seq Length L = 16 (4 hrs)" vertex="1">
+      <mxGeometry height="16" width="240" x="880" y="571" as="geometry" />
+    </mxCell>
+    <mxCell id="s4_d4" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• FedAvg: 20 Rounds, E = 5" vertex="1">
+      <mxGeometry height="16" width="240" x="880" y="589" as="geometry" />
+    </mxCell>
+    <mxCell id="s4_d5" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• 40% Client Participation" vertex="1">
+      <mxGeometry height="16" width="240" x="880" y="607" as="geometry" />
+    </mxCell>
+    <mxCell id="s4_d6" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontStyle=1;strokeColor=none;fillColor=none;fontColor=#9673a6;" value="• Privacy: No Raw Data Shared" vertex="1">
+      <mxGeometry height="16" width="240" x="880" y="625" as="geometry" />
+    </mxCell>
+    <mxCell id="a45" edge="1" parent="1" source="s4_box" style="edgeStyle=orthogonalEdgeStyle;curved=1;strokeWidth=3.5;strokeColor=#FF6D00;exitX=0.086;exitY=0.499;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=diamond;endFill=1;endSize=6;startArrow=diamond;startFill=1;startSize=6;exitPerimeter=0;" target="s5_box" value="">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="a45_lbl" parent="1" style="text;align=center;verticalAlign=middle;fontSize=9;fontColor=#BF360C;strokeColor=none;fillColor=#FFF3E0;rounded=1;fontStyle=3;spacingLeft=4;spacingRight=4;" value="⚡ Load Forecasts ŷ(t+1)" vertex="1">
+      <mxGeometry height="20" width="130" x="670" y="510" as="geometry" />
+    </mxCell>
+    <mxCell id="s5_box" parent="1" style="shape=trapezoid;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;shadow=1;perimeter=trapezoidPerimeter;size=0.12;strokeWidth=2;" value="" vertex="1">
+      <mxGeometry height="280" width="290" x="412.5" y="400" as="geometry" />
+    </mxCell>
+    <mxCell id="s5_badge" parent="1" style="rounded=1;fillColor=#b85450;fontColor=#FFFFFF;fontSize=9;fontStyle=1;strokeColor=none;arcSize=50;" value="STAGE 5" vertex="1">
+      <mxGeometry height="18" width="55" x="520" y="430" as="geometry" />
+    </mxCell>
+    <mxCell id="s5_name" parent="1" style="text;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#111111;strokeColor=none;fillColor=none;" value="Stackelberg Game Pricing" vertex="1">
+      <mxGeometry height="25" width="210" x="454" y="455" as="geometry" />
+    </mxCell>
+    <mxCell id="s5_chess" parent="1" style="text;align=center;verticalAlign=middle;fontSize=26;strokeColor=none;fillColor=none;" value="♟️" vertex="1">
+      <mxGeometry height="32" width="32" x="600" y="416" as="geometry" />
+    </mxCell>
+    <mxCell id="s5_leader" parent="1" style="rhombus;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;fontStyle=1;fontColor=#333333;" value="Leader" vertex="1">
+      <mxGeometry height="30" width="55" x="486" y="490" as="geometry" />
+    </mxCell>
+    <mxCell id="s5_arr" edge="1" parent="1" style="endArrow=classic;strokeColor=#b85450;strokeWidth=2;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="541" y="505" as="sourcePoint" />
+        <mxPoint x="576" y="505" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="s5_follow" parent="1" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;fontStyle=2;fontColor=#333333;" value="Followers" vertex="1">
+      <mxGeometry height="24" width="55" x="576" y="493" as="geometry" />
+    </mxCell>
+    <mxCell id="s5_d1" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Leader: Grid Operator (Price)" vertex="1">
+      <mxGeometry height="16" width="230" x="448" y="530" as="geometry" />
+    </mxCell>
+    <mxCell id="s5_d2" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Followers: 50 Smart Homes" vertex="1">
+      <mxGeometry height="16" width="230" x="448" y="548" as="geometry" />
+    </mxCell>
+    <mxCell id="s5_d3" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Comfort Weight w = 15.0" vertex="1">
+      <mxGeometry height="16" width="230" x="448" y="566" as="geometry" />
+    </mxCell>
+    <mxCell id="s5_d4" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Supply Capacity K = 150 kW" vertex="1">
+      <mxGeometry height="16" width="230" x="448" y="584" as="geometry" />
+    </mxCell>
+    <mxCell id="s5_d5" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Price Range: [₹3, ₹15]/kWh" vertex="1">
+      <mxGeometry height="16" width="230" x="448" y="602" as="geometry" />
+    </mxCell>
+    <mxCell id="s5_d6" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontStyle=1;strokeColor=none;fillColor=none;fontColor=#b85450;" value="• Equilibrium: p* ≈ ₹4.24/kWh" vertex="1">
+      <mxGeometry height="16" width="230" x="448" y="622" as="geometry" />
+    </mxCell>
+    <mxCell id="a56" edge="1" parent="1" source="s5_box" style="edgeStyle=orthogonalEdgeStyle;curved=1;strokeWidth=3.5;strokeColor=#FF6D00;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=diamond;endFill=1;endSize=6;startArrow=diamond;startFill=1;startSize=6;" target="s6_box" value="">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="a56_lbl" parent="1" style="text;align=center;verticalAlign=middle;fontSize=9;fontColor=#BF360C;strokeColor=none;fillColor=#FFF3E0;rounded=1;fontStyle=3;spacingLeft=4;spacingRight=4;" value="⚡ Dynamic Prices p*_h" vertex="1">
+      <mxGeometry height="20" width="120" x="290" y="510" as="geometry" />
+    </mxCell>
+    <mxCell id="s6_box" parent="1" style="ellipse;whiteSpace=wrap;fillColor=#d0e0f0;strokeColor=#4472C4;shadow=1;strokeWidth=2;" value="" vertex="1">
+      <mxGeometry height="310" width="380" x="-10" y="390" as="geometry" />
+    </mxCell>
+    <mxCell id="s6_badge" parent="1" style="rounded=1;fillColor=#4472C4;fontColor=#FFFFFF;fontSize=9;fontStyle=1;strokeColor=none;arcSize=50;" value="STAGE 6" vertex="1">
+      <mxGeometry height="18" width="55" x="133" y="430" as="geometry" />
+    </mxCell>
+    <mxCell id="s6_name" parent="1" style="text;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#111111;strokeColor=none;fillColor=none;" value="DE Schedule Optimization" vertex="1">
+      <mxGeometry height="25" width="240" x="60" y="455" as="geometry" />
+    </mxCell>
+    <mxCell id="s6_dna" parent="1" style="text;align=center;verticalAlign=middle;fontSize=26;strokeColor=none;fillColor=none;" value="🧬" vertex="1">
+      <mxGeometry height="36" width="30" x="241" y="417" as="geometry" />
+    </mxCell>
+    <mxCell id="de_p" parent="1" style="rounded=1;fillColor=#B8CCE4;strokeColor=#4472C4;fontSize=8;fontStyle=1;fontColor=#333333;" value="Pop" vertex="1">
+      <mxGeometry height="18" width="38" x="70" y="492" as="geometry" />
+    </mxCell>
+    <mxCell id="de_ea1" edge="1" parent="1" style="endArrow=classic;strokeColor=#4472C4;strokeWidth=1.5;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="108" y="501" as="sourcePoint" />
+        <mxPoint x="126" y="501" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="de_m" parent="1" style="rounded=1;fillColor=#B8CCE4;strokeColor=#4472C4;fontSize=8;fontStyle=1;fontColor=#333333;" value="Mutate" vertex="1">
+      <mxGeometry height="18" width="45" x="126" y="492" as="geometry" />
+    </mxCell>
+    <mxCell id="de_ea2" edge="1" parent="1" style="endArrow=classic;strokeColor=#4472C4;strokeWidth=1.5;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="171" y="501" as="sourcePoint" />
+        <mxPoint x="185" y="501" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="de_x" parent="1" style="rounded=1;fillColor=#B8CCE4;strokeColor=#4472C4;fontSize=8;fontStyle=1;fontColor=#333333;" value="Cross" vertex="1">
+      <mxGeometry height="18" width="42" x="185" y="492" as="geometry" />
+    </mxCell>
+    <mxCell id="de_ea3" edge="1" parent="1" style="endArrow=classic;strokeColor=#4472C4;strokeWidth=1.5;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="227" y="501" as="sourcePoint" />
+        <mxPoint x="241" y="501" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="de_s" parent="1" style="rounded=1;fillColor=#B8CCE4;strokeColor=#4472C4;fontSize=8;fontStyle=1;fontColor=#333333;" value="Select" vertex="1">
+      <mxGeometry height="18" width="42" x="241" y="492" as="geometry" />
+    </mxCell>
+    <mxCell id="s6_d1" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• DE/rand/1/bin (F=0.8, CR=0.9)" vertex="1">
+      <mxGeometry height="16" width="250" x="60" y="522" as="geometry" />
+    </mxCell>
+    <mxCell id="s6_d2" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Pop = 100, Gen = 500" vertex="1">
+      <mxGeometry height="16" width="250" x="60" y="540" as="geometry" />
+    </mxCell>
+    <mxCell id="s6_d3" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• 7 Appliances × 96 Time Slots" vertex="1">
+      <mxGeometry height="16" width="250" x="60" y="558" as="geometry" />
+    </mxCell>
+    <mxCell id="s6_d4" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• 8-Term Fitness Function" vertex="1">
+      <mxGeometry height="16" width="250" x="60" y="576" as="geometry" />
+    </mxCell>
+    <mxCell id="s6_d5" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• ON-Count Repair Operator" vertex="1">
+      <mxGeometry height="16" width="250" x="60" y="594" as="geometry" />
+    </mxCell>
+    <mxCell id="s6_d6" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontStyle=1;strokeColor=none;fillColor=none;fontColor=#4472C4;" value="• Cost Savings: 46.2%" vertex="1">
+      <mxGeometry height="16" width="250" x="60" y="612" as="geometry" />
+    </mxCell>
+    <mxCell id="a6out" edge="1" parent="1" source="s6_box" style="edgeStyle=orthogonalEdgeStyle;curved=1;strokeWidth=3;strokeColor=#4CAF50;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=blockThin;endFill=1;endSize=8;startArrow=oval;startFill=1;startSize=5;" target="out_box" value="">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="a6out_lbl" parent="1" style="text;align=center;verticalAlign=middle;fontSize=9;fontColor=#1B5E20;strokeColor=none;fillColor=#E8F5E9;rounded=1;fontStyle=3;spacingLeft=4;spacingRight=4;" value="✅ Optimized Schedule S*" vertex="1">
+      <mxGeometry height="20" width="135" x="215" y="720" as="geometry" />
+    </mxCell>
+    <mxCell id="out_box" parent="1" style="shape=display;whiteSpace=wrap;fillColor=#F5F5F5;strokeColor=#333333;shadow=1;strokeWidth=2;" value="" vertex="1">
+      <mxGeometry height="120" width="400" x="420" y="740" as="geometry" />
+    </mxCell>
+    <mxCell id="out_title" parent="1" style="text;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#111111;strokeColor=none;fillColor=none;" value="OUTPUT: Interactive Dashboard" vertex="1">
+      <mxGeometry height="25" width="300" x="480" y="750" as="geometry" />
+    </mxCell>
+    <mxCell id="out_d1" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Real-time Plotly Dash Web Interface" vertex="1">
+      <mxGeometry height="15" width="300" x="500" y="775" as="geometry" />
+    </mxCell>
+    <mxCell id="out_d2" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Appliance Toggle + 24-hr Schedule" vertex="1">
+      <mxGeometry height="15" width="300" x="500" y="792.5" as="geometry" />
+    </mxCell>
+    <mxCell id="out_d3" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Before/After Cost &amp; Load Comparison" vertex="1">
+      <mxGeometry height="15" width="300" x="500" y="809.5" as="geometry" />
+    </mxCell>
+    <mxCell id="out_d4" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="• SG Prices + GRU Metrics (MAE, RMSE)" vertex="1">
+      <mxGeometry height="15" width="300" x="500" y="824.5" as="geometry" />
+    </mxCell>
+    <mxCell id="out_icon" parent="1" style="text;align=center;verticalAlign=middle;fontSize=26;strokeColor=none;fillColor=none;" value="🖥️" vertex="1">
+      <mxGeometry height="30" width="30" x="770" y="755" as="geometry" />
+    </mxCell>
+    <mxCell id="ce_box" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;arcSize=12;dashed=1;dashPattern=5 3;" value="" vertex="1">
+      <mxGeometry height="90" width="260" x="20" y="750" as="geometry" />
+    </mxCell>
+    <mxCell id="ce_title" parent="1" style="text;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;fontColor=#111111;strokeColor=none;fillColor=none;" value="Constraint Engine" vertex="1">
+      <mxGeometry height="22" width="180" x="60" y="753" as="geometry" />
+    </mxCell>
+    <mxCell id="ce_d1" parent="1" style="text;align=left;verticalAlign=middle;fontSize=9;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Max Power: 15 kW/hr" vertex="1">
+      <mxGeometry height="14" width="210" x="35" y="778" as="geometry" />
+    </mxCell>
+    <mxCell id="ce_d2" parent="1" style="text;align=left;verticalAlign=middle;fontSize=9;fontColor=#333333;strokeColor=none;fillColor=none;" value="• Max Energy: 80 kWh/day" vertex="1">
+      <mxGeometry height="14" width="210" x="35" y="794" as="geometry" />
+    </mxCell>
+    <mxCell id="ce_d3" parent="1" style="text;align=left;verticalAlign=middle;fontSize=9;fontColor=#333333;strokeColor=none;fillColor=none;" value="• ON-count conservation (hard)" vertex="1">
+      <mxGeometry height="14" width="210" x="35" y="810" as="geometry" />
+    </mxCell>
+    <mxCell id="ce_arr" edge="1" parent="1" source="ce_box" style="endArrow=classic;startArrow=classic;strokeColor=#d79b00;dashed=1;strokeWidth=2;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="s6_box" value="">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="priv_box" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=none;strokeColor=#9673a6;dashed=1;dashPattern=8 4;arcSize=12;" value="" vertex="1">
+      <mxGeometry height="100" width="160" x="1230" y="430" as="geometry" />
+    </mxCell>
+    <mxCell id="priv_t" parent="1" style="text;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;fontColor=#9673a6;strokeColor=none;fillColor=none;" value="🔒 Privacy Boundary" vertex="1">
+      <mxGeometry height="18" width="150" x="1235" y="435" as="geometry" />
+    </mxCell>
+    <mxCell id="priv_d" parent="1" style="text;align=center;verticalAlign=top;fontSize=9;fontColor=#9673a6;strokeColor=none;fillColor=none;" value="Raw data never leaves&#xa;individual homes.&#xa;Only model weights&#xa;are aggregated." vertex="1">
+      <mxGeometry height="60" width="140" x="1240" y="458" as="geometry" />
+    </mxCell>
+    <mxCell id="priv_a" edge="1" parent="1" style="endArrow=none;strokeColor=#9673a6;dashed=1;strokeWidth=1.5;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1200" y="480" as="sourcePoint" />
+        <mxPoint x="1230" y="480" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="res_box" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#E8F5E9;strokeColor=#4CAF50;arcSize=12;shadow=1;" value="" vertex="1">
+      <mxGeometry height="110" width="160" x="1230" y="560" as="geometry" />
+    </mxCell>
+    <mxCell id="res_t" parent="1" style="text;align=center;verticalAlign=middle;fontSize=11;fontStyle=1;strokeColor=none;fillColor=none;fontColor=#2E7D32;" value="📊 Key Results" vertex="1">
+      <mxGeometry height="20" width="140" x="1240" y="565" as="geometry" />
+    </mxCell>
+    <mxCell id="res_d1" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="MAE = 1.846 kW" vertex="1">
+      <mxGeometry height="15" width="130" x="1245" y="590" as="geometry" />
+    </mxCell>
+    <mxCell id="res_d2" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;" value="RMSE = 2.502 kW" vertex="1">
+      <mxGeometry height="15" width="130" x="1245" y="607" as="geometry" />
+    </mxCell>
+    <mxCell id="res_d3" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontStyle=1;strokeColor=none;fillColor=none;fontColor=#2E7D32;" value="Cost Savings = 46.2%" vertex="1">
+      <mxGeometry height="15" width="140" x="1245" y="624" as="geometry" />
+    </mxCell>
+    <mxCell id="res_d4" parent="1" style="text;align=left;verticalAlign=middle;fontSize=10;fontStyle=1;strokeColor=none;fillColor=none;fontColor=#2E7D32;" value="SG Equilibrium = ₹4.24" vertex="1">
+      <mxGeometry height="15" width="140" x="1245" y="641" as="geometry" />
+    </mxCell>
+  </root>
+</mxGraphModel>
