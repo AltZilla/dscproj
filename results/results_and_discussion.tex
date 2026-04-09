@@ -92,13 +92,15 @@ In this work, we introduce a hybrid intelligent model aimed at optimizing the pr
 
 Contributions are described as follows:
 
-We develop a novel end-to-end pipeline, which involves $\beta$-VAE dimensionality reduction in tandem with Federated GRU models. The resulting architecture ensures precise prediction performance with extremely low communication overheads and full privacy protection for raw data residing at remote IoT nodes.
+\begin{itemize}
+    \item We develop a novel end-to-end pipeline, which involves $\beta$-VAE dimensionality reduction in tandem with Federated GRU models. The resulting architecture ensures precise prediction performance with extremely low communication overheads and full privacy protection for raw data residing at remote IoT nodes.
 
-We design a hierarchical Stackelberg game with a time-varying strategy, coupled with federated forecast results, to establish a closed-loop demand-response market system that can derive optimal equilibrium prices for electricity.
+    \item We design a hierarchical Stackelberg game with a time-varying strategy, coupled with federated forecast results, to establish a closed-loop demand-response market system that can derive optimal equilibrium prices for electricity.
 
-We apply a severely restricted multi-objective DE optimizer (DE/rand/1/bin) that assesses a customized fitness function consisting of eight criteria to accomplish simultaneous peak shaving, thermal comfort maintenance, and constraint satisfaction.
+    \item We apply a severely restricted multi-objective DE optimizer (DE/rand/1/bin) that assesses a customized fitness function consisting of eight criteria to accomplish simultaneous peak shaving, thermal comfort maintenance, and constraint satisfaction.
 
-We build a sophisticated digital twin simulator, capable of modeling stochastic Markov-based occupant dynamics and complicated thermal behavior, specifically intended for simulating a massive amount of synthetic data to test the joint optimization framework.
+    \item We build a sophisticated digital twin simulator, capable of modeling stochastic Markov-based occupant dynamics and complicated thermal behavior, specifically intended for simulating a massive amount of synthetic data to test the joint optimization framework.
+\end{itemize}
 
 The rest of this paper is organized as follows: Related work and open challenges in existing literature are reviewed in Section II. Section III gives a brief description of the proposed system architecture. In Section IV, we provide detailed mathematical derivations and implementations of six key components. Section V describes our simulation setup, including datasets, validation experiments, and comparative analysis. Finally, concluding remarks are made in Section VI.
 
@@ -107,7 +109,7 @@ The rest of this paper is organized as follows: Related work and open challenges
 % ############################################################
 \section{Related Works}
 
-A wide variety of approaches have been proposed in the areas of smart home energy management, forecasting demands, and privacy-preserving automation. Recently, researchers have suggested a plethora of methods including but not limited to reinforcement learning and spatiotemporal federated setups, each focusing on different aspects of this multidimensional problem \cite{rahman2025electrical, zhang2025adaptive}. This section provides an overview and critique of relevant studies published in 2018--2025 according to the principal algorithmic families involved.
+A wide variety of approaches have been proposed in the areas of smart home energy management, forecasting demands, and privacy-preserving automation. Recently, researchers have suggested a plethora of methods including but not limited to reinforcement learning and spatiotemporal federated setups, each focusing on different aspects of this multidimensional problem \cite{rahman2025electrical, zhang2025adaptive}. This section provides an overview and critique of relevant studies published in 2024--2026 according to the principal algorithmic families involved.
 
 The use of deep reinforcement learning (DRL) in the context of managing appliance states is extensively studied. For example, Li et al. \cite{madrl2025} designed a scalable and multi-agent DRL system that consists of Q-learning agents to control dynamic pricing, showing significant enhancements in cost-to-comfort trade-offs. Also, Bahrami et al. \cite{bahrami2021deep} and Tang et al. \cite{tang2024dynamic} designed DRL models aimed at coordinating demands using a strategy for dynamic competition within the framework of demand response. Despite the benefits of these DRL systems, where they continuously improve upon comfort level, they are generally known to need large centralized experience replay buffers and do not inherently possess the long-term temporal reasoning capabilities of seq2seq forecasting models.
 
@@ -707,7 +709,7 @@ where $M = 6$ is the total number of evaluation dimensions, $s_m \in [0,1]$ is t
 % ============================================================
 \section{Conclusion}
 
-In this paper, we have proposed a novel intelligent hybrid approach that is designed to tackle all the above mentioned complexities associated with energy management of smart homes. Our approach consists of a combination of six different modules to accomplish its goals. These include digital twin simulator, $\beta$-VAE, FedGRU network, hierarchical Stackelberg game model, DE optimizer, and an interactive dashboard. Firstly, digital twin simulator produces high-fidelity synthetic data for IoT-based energy consumption. Then, we utilize $\beta$-VAE for performing non-linear dimensionality reduction and obtaining reliable latent behavioral features while reducing the effects of noise on data. In addition, a distributed and privacy-preserving FedGRU network is used to perform load forecasting while avoiding any form of centralized processing of consumer data.
+In this paper, we have proposed a novel intelligent hybrid approach that is designed to tackle all the above mentioned complexities associated with energy management of smart homes. 
 
 The combination of various algorithmic blocks within the pipeline leads to a significant increase in efficiency. This fact is confirmed by an experimental assessment made using a fabricated dataset that contains 144,000 records generated over 30 days of operation for 50 smart homes. The proposed approach allows observing significant achievements compared to the current techniques. For example, the framework manages to minimize daily costs by reducing average daily expenses from 1308 INR to 704 INR, which equals a 46.2\% decrease in expenditures. At the same time, the presented system is capable of minimizing the peak loads in the grid and, therefore, improving its stability on the macro-scale. Finally, the forecasting part shows a high degree of accuracy with the values of MAE equal to 1.846 kW and RMSE of 2.502 kW after 20 FL steps.
 
